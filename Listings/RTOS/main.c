@@ -70,11 +70,15 @@ uint32_t HAL_GetTick(void) {
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+extern SPI_HandleTypeDef g_hspi;
+uint8_t g_aRxBuffer[20];
+uint8_t g_aTxBuffer[20]="DUMMY";
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void Error_Handler(void);
 static void MPU_Config(void);
 static void CPU_CACHE_Enable(void);
+extern HAL_StatusTypeDef Init_spi(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -91,6 +95,9 @@ int main(void)
      in his application, to enhance the performance in case of use of AXI interface 
      with several masters. */ 
   
+	/* Locals */
+	uint8_t cnt=0;
+	
   /* Configure the MPU attributes as Write Through */
   MPU_Config();
 
@@ -107,7 +114,8 @@ int main(void)
        - Set NVIC Group Priority to 4
        - Low Level Initialization
      */
-  HAL_Init();
+  if( HAL_Init() != HAL_OK )
+		Error_Handler();
 
   /* Configure the System clock to have a frequency of 216 MHz */
   SystemClock_Config();
@@ -116,6 +124,9 @@ int main(void)
   /* Add your application code here
      */
 
+	if( Init_spi() != HAL_OK )
+		Error_Handler();
+		
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
   // create 'thread' functions that start executing,
   // example: tid_name = osThreadCreate (osThread(name), NULL);
@@ -126,6 +137,20 @@ int main(void)
   /* Infinite loop */
   while (1)
   {
+		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET); // CS Reset
+		if (cnt++ % 2)
+		{
+			strncpy( (char*)g_aTxBuffer,"First frame",12 );
+			HAL_SPI_Transmit_DMA(&g_hspi,g_aTxBuffer,BUFFERSIZE(g_aTxBuffer));
+		}
+		else
+		{
+			strncpy( (char*)g_aTxBuffer,"Second frame",13 );
+			HAL_SPI_Transmit_DMA(&g_hspi,g_aTxBuffer,BUFFERSIZE(g_aTxBuffer));
+		}
+		
+		while(HAL_SPI_GetState(&g_hspi) != HAL_SPI_STATE_READY){}
+		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET); // CS Set
   }
 }
 

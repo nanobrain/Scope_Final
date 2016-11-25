@@ -1378,10 +1378,10 @@
 
 // <e> SPI2 (Serial Peripheral Interface 2) [Driver_SPI2]
 // <i> Configuration settings for Driver_SPI2 in component ::CMSIS Driver:SPI
-#define RTE_SPI2                        0
+#define RTE_SPI2                        1
 
 //   <o> SPI2_MISO Pin <0=>Not Used <1=>PB14 <2=>PC2 <3=>PI2
-#define RTE_SPI2_MISO_PORT_ID           0
+#define RTE_SPI2_MISO_PORT_ID           1
 #if    (RTE_SPI2_MISO_PORT_ID == 0)
 #define RTE_SPI2_MISO                   0
 #elif  (RTE_SPI2_MISO_PORT_ID == 1)
@@ -1401,7 +1401,7 @@
 #endif
 
 //   <o> SPI2_MOSI Pin <0=>Not Used <1=>PB15 <2=>PC1 <3=>PC3 <4=>PI3 <5=>PB15
-#define RTE_SPI2_MOSI_PORT_ID           0
+#define RTE_SPI2_MOSI_PORT_ID           1
 #if    (RTE_SPI2_MOSI_PORT_ID == 0)
 #define RTE_SPI2_MOSI                   0
 #elif  (RTE_SPI2_MOSI_PORT_ID == 1)
@@ -1429,7 +1429,7 @@
 #endif
 
 //   <o> SPI2_SCK Pin <0=>PA9 <1=>PB10 <2=>PB13 <3=>PD3 <4=>PI1 <5=>PA12
-#define RTE_SPI2_SCL_PORT_ID            0
+#define RTE_SPI2_SCL_PORT_ID            4
 #if    (RTE_SPI2_SCL_PORT_ID == 0)
 #define RTE_SPI2_SCL_PORT               GPIOA
 #define RTE_SPI2_SCL_BIT                9
@@ -1490,11 +1490,11 @@
 //     <o4> Priority <0=>Low <1=>Medium <2=>High <3=>Very High
 //     <i>  Selects DMA Priority
 //   </e>
-#define RTE_SPI2_RX_DMA                 0
+#define RTE_SPI2_RX_DMA                 1
 #define RTE_SPI2_RX_DMA_NUMBER          1
 #define RTE_SPI2_RX_DMA_STREAM          3
 #define RTE_SPI2_RX_DMA_CHANNEL         0
-#define RTE_SPI2_RX_DMA_PRIORITY        0
+#define RTE_SPI2_RX_DMA_PRIORITY        2
 
 //   <e> DMA Tx
 //     <o1> Number <1=>1
@@ -1506,11 +1506,11 @@
 //     <o4> Priority <0=>Low <1=>Medium <2=>High <3=>Very High
 //     <i>  Selects DMA Priority
 //   </e>
-#define RTE_SPI2_TX_DMA                 0
+#define RTE_SPI2_TX_DMA                 1
 #define RTE_SPI2_TX_DMA_NUMBER          1
 #define RTE_SPI2_TX_DMA_STREAM          4
 #define RTE_SPI2_TX_DMA_CHANNEL         0
-#define RTE_SPI2_TX_DMA_PRIORITY        0
+#define RTE_SPI2_TX_DMA_PRIORITY        2
 
 // </e>
 

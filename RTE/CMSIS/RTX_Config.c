@@ -257,7 +257,7 @@
 // OS Idle Thread
 __NO_RETURN void os_IdleThread (void *argument) {
   (void)argument;
-
+	__wfe();
   for (;;) {}
 }
  
