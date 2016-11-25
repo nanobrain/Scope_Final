@@ -1,0 +1,13 @@
+# Project files
+*.uvoptx
+*.uvprojx
+*.dbgconf
+*.map
+
+# Targets
+Objects/*
+*.lst
+
+# Unknown rubbish
+*.TMP
+*.0*
