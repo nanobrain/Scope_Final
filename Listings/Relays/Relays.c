@@ -40,15 +40,9 @@ HAL_StatusTypeDef Relays_Init(void)
 	HAL_GPIO_Init(REL_GND_GPIO_PORT,&GPIO_InitStructure);
 	
 	GPIO_InitStructure.Pin = REL_ATT_PIN;
-	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStructure.Pull = GPIO_PULLDOWN;
-	GPIO_InitStructure.Speed = GPIO_SPEED_LOW;
 	HAL_GPIO_Init(REL_ATT_GPIO_PORT,&GPIO_InitStructure);	
 
 	GPIO_InitStructure.Pin = REL_ACDC_PIN;
-	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStructure.Pull = GPIO_PULLDOWN;
-	GPIO_InitStructure.Speed = GPIO_SPEED_LOW;
 	HAL_GPIO_Init(REL_ACDC_GPIO_PORT,&GPIO_InitStructure);
 	
 	return HAL_OK;

@@ -42,6 +42,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "Leds.h"
+#include "Relays.h"
 
 #ifdef _RTE_
 #include "RTE_Components.h"             // Component selection
@@ -78,6 +80,8 @@ static void SystemClock_Config(void);
 static void Error_Handler(void);
 static void MPU_Config(void);
 static void CPU_CACHE_Enable(void);
+static void System_Init(void);
+static void Demo_Run(void);
 extern HAL_StatusTypeDef Init_spi(void);
 extern HAL_StatusTypeDef DAC_Init(void);
 extern HAL_StatusTypeDef DAC_DeInit(void);
@@ -103,7 +107,6 @@ int main(void)
      with several masters. */ 
   
 	/* Locals */
-	uint8_t cnt=0;
 	
   /* Configure the MPU attributes as Write Through */
   MPU_Config();
@@ -130,7 +133,22 @@ int main(void)
 
   /* Add your application code here
      */
+	System_Init();
+	
+#ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
+  // create 'thread' functions that start executing,
+  // example: tid_name = osThreadCreate (osThread(name), NULL);
 
+  osKernelStart();                      // start thread execution 
+#endif
+		
+	Demo_Run();
+  /* Infinite loop */
+  while (1) {}
+}
+
+static void System_Init(void)
+{
 	if( Init_spi() != HAL_OK )
 		Error_Handler();
 	
@@ -143,22 +161,54 @@ int main(void)
 	if( ADC_Init() != HAL_OK )
 		Error_Handler();
 	
-#ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
-  // create 'thread' functions that start executing,
-  // example: tid_name = osThreadCreate (osThread(name), NULL);
+	if( Leds_Init() != HAL_OK )
+		Error_Handler();
+	
+	if( Relays_Init() != HAL_OK )
+		Error_Handler();
+	
+	if( Buttons_Initialize() != 0)
+		Error_Handler();
+}
 
-  osKernelStart();                      // start thread execution 
-#endif
-
-  /* Infinite loop */
-  while (1) {
+static void Demo_Run(void)
+{
+	uint8_t cnt=0;
+	
+	while(Buttons_GetState() == 0){} // Start on button press
+		
+	while(Buttons_GetState()== 0)
+	{
+		Leds_All_Off();
+		
 		if( ADC_Receive() != HAL_OK )
 			Error_Handler();
 		
-		HAL_Delay(1);
+		HAL_Delay(1000);
+		Relay(REL_GND,TRUE);
+		Led(LED1,1);
+		HAL_Delay(1000);
+		Relay(REL_ATT,TRUE);
+		Led(LED2,1);
+		HAL_Delay(1000);
+		Relay(REL_ACDC,TRUE);
+		Led(LED3,1);
+		HAL_Delay(1000);
+		Relay(REL_GND,FALSE);
+		Led(LED4,1);
+		HAL_Delay(1000);
+		Relay(REL_ATT,FALSE);
+		Led(LED5,1);
+		HAL_Delay(1000);
+		Relay(REL_ACDC,FALSE);
+		
+		for(cnt=0;cnt<31;cnt++)
+		{
+			HAL_Delay(100);
+			Leds_Binary(cnt);
+		}
 	}
 }
-
 /**
   * @brief  System Clock Configuration
   *         The system Clock is configured as follow : 
