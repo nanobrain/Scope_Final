@@ -19,24 +19,13 @@ typedef enum DAC_POWER_MODE{
 	POWER_FULL
 }DAC_POWER_MODE;
 
-typedef enum LOGIC{
-	FALSE=0,
-	TRUE
-}LOGIC;
-
 /* Exported constants --------------------------------------------------------*/
 /* Definition for SPIx Pins */
 #define DAC_SPIx_CS_PIN                     GPIO_PIN_2
 #define DAC_SPIx_CS_GPIO_PORT               GPIOI
-#define DAC_GPIO_CLK_ENABLE										__HAL_RCC_GPIOI_CLK_ENABLE
-#define DAC_GPIO_CLK_DISABLE									__HAL_RCC_GPIOI_CLK_DISABLE
-
-/* Size of buffer */
-#define BUFFERSIZE(x)                       	(COUNTOF(x) - 1)
+#define DAC_GPIO_CLK_ENABLE									__HAL_RCC_GPIOI_CLK_ENABLE
 
 /* Exported macro ------------------------------------------------------------*/
-#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
-	
 /* Functions ------------------------------------------------------- */
 static void DAC_CS_Write(LOGIC a_SetReset);
 static HAL_StatusTypeDef DAC_Transmit(uint8_t*  a_p8u_Data);

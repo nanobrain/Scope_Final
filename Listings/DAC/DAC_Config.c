@@ -23,7 +23,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static uint8_t u32_txBuffer[3];
+static uint8_t u8_txBuffer[3];
 static uint8_t u8_CurrentValue=0;
 extern SPI_HandleTypeDef g_hspi;
 
@@ -56,7 +56,6 @@ HAL_StatusTypeDef DAC_Init(void)
 
 HAL_StatusTypeDef DAC_DeInit(void)
 {
-	DAC_GPIO_CLK_DISABLE();
 	HAL_GPIO_DeInit(DAC_SPIx_CS_GPIO_PORT,DAC_SPIx_CS_PIN);
 	return HAL_OK;
 }

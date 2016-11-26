@@ -44,6 +44,11 @@
 #include "stm32f7xx_hal.h"
 
 /* Exported types ------------------------------------------------------------*/
+typedef enum LOGIC{
+	FALSE=0,
+	TRUE
+}LOGIC;
+
 /* Exported constants --------------------------------------------------------*/
 
 /* Definition for SPIx clock resources */

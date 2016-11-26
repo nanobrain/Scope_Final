@@ -141,16 +141,6 @@ void DebugMon_Handler(void)
 /*  file (startup_stm32f7xx.s).                                               */
 /******************************************************************************/
 /**
-  * @brief  This function handles DMA Rx interrupt request.
-  * @param  None
-  * @retval None
-  */
-void SPIx_DMA_RX_IRQHandler(void)
-{
-  HAL_DMA_IRQHandler(g_hspi.hdmarx);
-}
-
-/**
   * @brief  This function handles SPI interrupt request.
   * @param  None
   * @retval None
@@ -158,6 +148,16 @@ void SPIx_DMA_RX_IRQHandler(void)
 void SPIx_IRQHandler(void)
 {
   HAL_SPI_IRQHandler(&g_hspi);
+}
+
+/**
+  * @brief  This function handles DMA Rx interrupt request.
+  * @param  None
+  * @retval None
+  */
+void SPIx_DMA_RX_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(g_hspi.hdmarx);
 }
 
 /**
@@ -182,6 +182,12 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 	UNUSED(hspi);
 }
 
+/**
+  * @brief Rx Transfer completed callback.
+  * @param  hspi: pointer to a SPI_HandleTypeDef structure that contains
+  *               the configuration information for SPI module.
+  * @retval None
+  */
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 {
   /* Prevent unused argument(s) compilation warning */

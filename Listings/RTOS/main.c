@@ -83,6 +83,9 @@ extern HAL_StatusTypeDef DAC_Init(void);
 extern HAL_StatusTypeDef DAC_DeInit(void);
 extern HAL_StatusTypeDef VGA_Init(void);
 extern HAL_StatusTypeDef VGA_DeInit(void);
+extern HAL_StatusTypeDef ADC_Init(void);
+extern HAL_StatusTypeDef ADC_DeInit(void);
+extern HAL_StatusTypeDef ADC_Receive(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -136,7 +139,10 @@ int main(void)
 	
 	if( VGA_Init() != HAL_OK )
 		Error_Handler();
-		
+	
+	if( ADC_Init() != HAL_OK )
+		Error_Handler();
+	
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
   // create 'thread' functions that start executing,
   // example: tid_name = osThreadCreate (osThread(name), NULL);
@@ -145,7 +151,12 @@ int main(void)
 #endif
 
   /* Infinite loop */
-  while (1) {}
+  while (1) {
+		if( ADC_Receive() != HAL_OK )
+			Error_Handler();
+		
+		HAL_Delay(1);
+	}
 }
 
 /**

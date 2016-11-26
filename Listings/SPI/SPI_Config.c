@@ -30,7 +30,7 @@ HAL_StatusTypeDef Init_spi()
 	g_hspi.Instance = SPIx;
 	g_hspi.Init.Mode = SPI_MODE_MASTER;
 	g_hspi.Init.Direction = SPI_DIRECTION_2LINES;
-	g_hspi.Init.DataSize = SPI_DATASIZE_8BIT; //TODO: In future, put here 16bit
+	g_hspi.Init.DataSize = SPI_DATASIZE_8BIT;
 	g_hspi.Init.CLKPolarity = SPI_POLARITY_HIGH;
 	g_hspi.Init.CLKPhase = SPI_PHASE_1EDGE;
 	g_hspi.Init.NSS = SPI_NSS_SOFT;
@@ -100,8 +100,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi){
 		htx_dma.Init.Priority = DMA_PRIORITY_LOW;
 		htx_dma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 		htx_dma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-		htx_dma.Init.MemBurst = DMA_MBURST_INC8;
-		htx_dma.Init.PeriphBurst = DMA_PBURST_INC8;
+		htx_dma.Init.MemBurst = DMA_MBURST_SINGLE;
+		htx_dma.Init.PeriphBurst = DMA_MBURST_SINGLE;
 		
 		HAL_DMA_Init(&htx_dma);
 		
@@ -120,8 +120,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi){
 		hrx_dma.Init.Priority = DMA_PRIORITY_HIGH;
 		hrx_dma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 		hrx_dma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-		hrx_dma.Init.MemBurst = DMA_MBURST_INC8;
-		hrx_dma.Init.PeriphBurst = DMA_PBURST_INC8;
+		hrx_dma.Init.MemBurst = DMA_MBURST_SINGLE;
+		hrx_dma.Init.PeriphBurst = DMA_PBURST_SINGLE;
 		
 		HAL_DMA_Init(&hrx_dma);
 		

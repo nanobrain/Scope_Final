@@ -49,24 +49,12 @@ typedef enum VGA_LADDER_GAIN{
 	DB20=20
 }VGA_LADDER_GAIN;
 
-typedef enum LOGIC{
-	FALSE=0,
-	TRUE
-}LOGIC;
-
 /* Exported constants --------------------------------------------------------*/
 /* Definition for SPIx Pins */
 #define VGA_SPIx_CS_PIN                     GPIO_PIN_4
 #define VGA_SPIx_CS_GPIO_PORT               GPIOB
 #define VGA_GPIO_CLK_ENABLE										__HAL_RCC_GPIOB_CLK_ENABLE
-#define VGA_GPIO_CLK_DISABLE									__HAL_RCC_GPIOB_CLK_DISABLE
-
-/* Size of buffer */
-#define BUFFERSIZE(x)                       	(COUNTOF(x) - 1)
-
 /* Exported macro ------------------------------------------------------------*/
-#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
-	
 /* Functions ------------------------------------------------------- */
 static void VGA_CS_Write(LOGIC a_SetReset);
 static HAL_StatusTypeDef VGA_Transmit(uint8_t*  a_p8u_Data);

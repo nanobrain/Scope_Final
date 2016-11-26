@@ -5,3 +5,4 @@ TODO:
 	- OutputState
 	- PowerState
 ## Use Mutex for SPI bus
+## On every DeInit mehtod call check if You can disable clk for GPIO port
