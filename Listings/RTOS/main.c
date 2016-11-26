@@ -144,7 +144,6 @@ int main(void)
 
   /* Infinite loop */
   while (1) {
-	Set_DAC_Output(cnt++);
 	}
 }
 
