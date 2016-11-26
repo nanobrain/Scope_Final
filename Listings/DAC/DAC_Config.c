@@ -115,12 +115,9 @@ static HAL_StatusTypeDef DAC_Transmit(uint8_t*  a_p8u_Data)
 	return errCode;
 }
 
-static void DAC_CS_Write(LOGIC a_SetReset)
+static void DAC_CS_Write(LOGIC a_State)
 {
-	if( a_SetReset == TRUE )
-		HAL_GPIO_WritePin(DAC_SPIx_CS_GPIO_PORT,DAC_SPIx_CS_PIN,GPIO_PIN_SET);
-	else
-		HAL_GPIO_WritePin(DAC_SPIx_CS_GPIO_PORT,DAC_SPIx_CS_PIN,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DAC_SPIx_CS_GPIO_PORT,DAC_SPIx_CS_PIN,(a_State ? GPIO_PIN_SET : GPIO_PIN_RESET));
 }
 
 /**** END OF FILE ****/

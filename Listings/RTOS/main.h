@@ -42,11 +42,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include <cstring>
 #include "stm32f7xx_hal.h"
+#include "Board_Buttons.h"              // ::Board Support:Buttons
 
 /* Exported types ------------------------------------------------------------*/
 typedef enum LOGIC{
 	FALSE=0,
-	TRUE
+	TRUE=1
 }LOGIC;
 
 /* Exported constants --------------------------------------------------------*/

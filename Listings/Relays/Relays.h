@@ -1,40 +1,43 @@
 /**
   ******************************************************************************
-  * @file    DAC/DAC_Config.h 
+  * @file    Relays/Relays.h
   * @author  Adrian Kurylak
   * @version V1.0.0
   * @date    25-November-2016
-  * @brief   Header for dac configuration file
+  * @brief   Header for relays configuration file
   ******************************************************************************
   */
   
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __DAC_CONFIG_H
-#define __DAC_CONFIG_H
+#ifndef __RELAY_CONFIG_H
+#define __RELAY_CONFIG_H
 
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
-typedef enum DAC_POWER_MODE{
-	POWER_DOWN,
-	POWER_FULL
-}DAC_POWER_MODE;
+typedef enum RELAY{
+	REL_GND,
+	REL_ATT,
+	REL_ACDC
+}RELAY;
 
 /* Exported constants --------------------------------------------------------*/
-/* Definition for SPIx Pins */
-#define DAC_SPIx_CS_PIN                     GPIO_PIN_2
-#define DAC_SPIx_CS_GPIO_PORT               GPIOI
-#define DAC_GPIO_CLK_ENABLE									__HAL_RCC_GPIOI_CLK_ENABLE
+/* Definition for Pins */
+#define REL_GND_PIN											GPIO_PIN_7
+#define REL_ATT_PIN											GPIO_PIN_0
+#define REL_ACDC_PIN										GPIO_PIN_15
+#define REL_GND_GPIO_PORT								GPIOG
+#define REL_ATT_GPIO_PORT								GPIOI
+#define REL_ACDC_GPIO_PORT							GPIOA
+#define REL_GND_GPIO_CLK_ENABLE					__HAL_RCC_GPIOG_CLK_ENABLE
+#define REL_ATT_GPIO_CLK_ENABLE					__HAL_RCC_GPIOI_CLK_ENABLE
+#define REL_ACDC_GPIO_CLK_ENABLE				__HAL_RCC_GPIOA_CLK_ENABLE
 
 /* Exported macro ------------------------------------------------------------*/
 /* Functions ------------------------------------------------------- */
-static void DAC_CS_Write(LOGIC a_State);
-static HAL_StatusTypeDef DAC_Transmit(uint8_t*  a_p8u_Data);
-HAL_StatusTypeDef Set_DAC_Output(uint8_t a_8u_voltage);
-uint8_t Get_DAC_Output(void);
-HAL_StatusTypeDef Set_DAC_Power_Mode(DAC_POWER_MODE a_PowerMode);
-HAL_StatusTypeDef DAC_Init(void);
-HAL_StatusTypeDef DAC_DeInit(void);
+HAL_StatusTypeDef Relays_Init(void);
+HAL_StatusTypeDef Relays_DeInit(void);
+void Relay(RELAY a_Relay,LOGIC a_State);
 
-#endif /* __DAC_CONFIG_H */
+#endif /* __RELAY_CONFIG_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

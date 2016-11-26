@@ -1,3 +1,13 @@
+/**
+  ******************************************************************************
+  * @file    SPI/SPI_Config.c 
+  * @author  Adrian Kurylak
+  * @version V1.0.0
+  * @date    25-November-2016
+  * @brief   SPI configuration file
+  ******************************************************************************
+  */
+	
 /* Includes */
 #include "main.h"
 #include "stm32f7xx_hal_conf.h"         // Keil::Device:STM32Cube Framework:Classic
