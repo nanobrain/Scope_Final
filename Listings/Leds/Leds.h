@@ -15,32 +15,32 @@
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 typedef enum LEDS{
-	LED1,
-	LED2,
-	LED3,
-	LED4,
-	LED5,
+	LEDRED1,
+	LEDRED2,
+	LEDRED3,
+	LEDBLUE,
+	LEDGREEN,
 }LEDS;
 
 /* Exported constants --------------------------------------------------------*/
 /* Definition for Pins */
-#define LED1_PIN									GPIO_PIN_0
-#define LED2_PIN									GPIO_PIN_10
-#define LED3_PIN									GPIO_PIN_9
-#define LED4_PIN									GPIO_PIN_8
-#define LED5_PIN									GPIO_PIN_7
+#define LEDRED1_PIN									GPIO_PIN_0
+#define LEDRED2_PIN									GPIO_PIN_10
+#define LEDRED3_PIN									GPIO_PIN_9
+#define LEDBLUE_PIN									GPIO_PIN_8
+#define LEDGREEN_PIN								GPIO_PIN_7
 
-#define LED1_GPIO_PORT						GPIOA
-#define LED2_GPIO_PORT						GPIOF
-#define LED3_GPIO_PORT						GPIOF
-#define LED4_GPIO_PORT						GPIOF
-#define LED5_GPIO_PORT						GPIOF
+#define LEDRED1_GPIO_PORT						GPIOA
+#define LEDRED2_GPIO_PORT						GPIOF
+#define LEDRED3_GPIO_PORT						GPIOF
+#define LEDBLUE_GPIO_PORT						GPIOF
+#define LEDGREEN_GPIO_PORT					GPIOF
 
-#define LED1_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOA_CLK_ENABLE();
-#define LED2_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
-#define LED3_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
-#define LED4_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
-#define LED5_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
+#define LEDRED1_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOA_CLK_ENABLE();
+#define LEDRED2_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
+#define LEDRED3_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
+#define LEDBLUE_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
+#define LEDGREEN_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
 
 /* Exported macro ------------------------------------------------------------*/
 /* Functions ------------------------------------------------------- */

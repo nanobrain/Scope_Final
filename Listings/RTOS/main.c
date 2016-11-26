@@ -42,6 +42,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "Error_Handler.h"
 #include "Leds.h"
 #include "Relays.h"
 
@@ -77,7 +78,6 @@ uint8_t g_aRxBuffer[20];
 uint8_t g_aTxBuffer[20]="DUMMY";
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
-static void Error_Handler(void);
 static void MPU_Config(void);
 static void CPU_CACHE_Enable(void);
 static void System_Init(void);
@@ -125,7 +125,7 @@ int main(void)
        - Low Level Initialization
      */
   if( HAL_Init() != HAL_OK )
-		Error_Handler();
+		Error_Handler(INIT_ERROR);
 
   /* Configure the System clock to have a frequency of 216 MHz */
   SystemClock_Config();
@@ -150,25 +150,25 @@ int main(void)
 static void System_Init(void)
 {
 	if( Init_spi() != HAL_OK )
-		Error_Handler();
+		Error_Handler(INIT_ERROR);
 	
 	if( DAC_Init() != HAL_OK )
-		Error_Handler();
+		Error_Handler(INIT_ERROR);
 	
 	if( VGA_Init() != HAL_OK )
-		Error_Handler();
+		Error_Handler(INIT_ERROR);
 	
 	if( ADC_Init() != HAL_OK )
-		Error_Handler();
+		Error_Handler(INIT_ERROR);
 	
 	if( Leds_Init() != HAL_OK )
-		Error_Handler();
+		Error_Handler(INIT_ERROR);
 	
 	if( Relays_Init() != HAL_OK )
-		Error_Handler();
+		Error_Handler(INIT_ERROR);
 	
 	if( Buttons_Initialize() != 0)
-		Error_Handler();
+		Error_Handler(INIT_ERROR);
 }
 
 static void Demo_Run(void)
@@ -182,23 +182,23 @@ static void Demo_Run(void)
 		Leds_All_Off();
 		
 		if( ADC_Receive() != HAL_OK )
-			Error_Handler();
+			Error_Handler(INIT_ERROR);
 		
 		HAL_Delay(1000);
 		Relay(REL_GND,TRUE);
-		Led(LED1,1);
+		Led(LEDRED1,1);
 		HAL_Delay(1000);
 		Relay(REL_ATT,TRUE);
-		Led(LED2,1);
+		Led(LEDRED2,1);
 		HAL_Delay(1000);
 		Relay(REL_ACDC,TRUE);
-		Led(LED3,1);
+		Led(LEDRED3,1);
 		HAL_Delay(1000);
 		Relay(REL_GND,FALSE);
-		Led(LED4,1);
+		Led(LEDBLUE,1);
 		HAL_Delay(1000);
 		Relay(REL_ATT,FALSE);
-		Led(LED5,1);
+		Led(LEDGREEN,1);
 		HAL_Delay(1000);
 		Relay(REL_ACDC,FALSE);
 		
@@ -246,13 +246,13 @@ static void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLQ = 9;
   if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler(INIT_ERROR);
   }
 
   /* activate the OverDrive to reach the 216 Mhz Frequency */
   if(HAL_PWREx_EnableOverDrive() != HAL_OK)
   {
-    Error_Handler();
+    Error_Handler(INIT_ERROR);
   }
   
   /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 
@@ -264,20 +264,7 @@ static void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;  
   if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
   {
-    Error_Handler();
-  }
-}
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
-static void Error_Handler(void)
-{
-  /* User may add here some code to deal with this error */
-  while(1)
-  {
+    Error_Handler(INIT_ERROR);
   }
 }
 
