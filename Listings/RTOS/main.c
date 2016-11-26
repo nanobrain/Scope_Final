@@ -79,6 +79,9 @@ static void Error_Handler(void);
 static void MPU_Config(void);
 static void CPU_CACHE_Enable(void);
 extern HAL_StatusTypeDef Init_spi(void);
+extern HAL_StatusTypeDef DAC_Init(void);
+extern HAL_StatusTypeDef DAC_DeInit(void);
+extern HAL_StatusTypeDef Set_DAC_Output(uint8_t a_8u_voltage);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -126,6 +129,11 @@ int main(void)
 
 	if( Init_spi() != HAL_OK )
 		Error_Handler();
+	
+	if( DAC_Init() != HAL_OK )
+		Error_Handler();
+	
+	Set_DAC_Output(10);
 		
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
   // create 'thread' functions that start executing,
@@ -135,23 +143,9 @@ int main(void)
 #endif
 
   /* Infinite loop */
-  while (1)
-  {
-		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_RESET); // CS Reset
-		if (cnt++ % 2)
-		{
-			strncpy( (char*)g_aTxBuffer,"First frame",12 );
-			HAL_SPI_Transmit_DMA(&g_hspi,g_aTxBuffer,BUFFERSIZE(g_aTxBuffer));
-		}
-		else
-		{
-			strncpy( (char*)g_aTxBuffer,"Second frame",13 );
-			HAL_SPI_Transmit_DMA(&g_hspi,g_aTxBuffer,BUFFERSIZE(g_aTxBuffer));
-		}
-		
-		while(HAL_SPI_GetState(&g_hspi) != HAL_SPI_STATE_READY){}
-		HAL_GPIO_WritePin(GPIOG,GPIO_PIN_6,GPIO_PIN_SET); // CS Set
-  }
+  while (1) {
+	Set_DAC_Output(cnt++);
+	}
 }
 
 /**
