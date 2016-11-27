@@ -24,42 +24,95 @@ void Error_Handler(ERRCODE a_errCode)
 {
 	switch(a_errCode)
 	{
-		case INIT_ERROR:
+		case ERROR_INIT:
+		{
+			while(1)
+			{
+				Led(LEDRED1,TRUE); // Red1 led on
+				Led(LEDBLUE,TRUE); // 3x blue led blink
+				HAL_Delay(100);
+				Led(LEDBLUE,FALSE);
+				HAL_Delay(100);
+				Led(LEDBLUE,TRUE);
+				HAL_Delay(100);
+				Led(LEDBLUE,FALSE);
+				HAL_Delay(100);
+				Led(LEDBLUE,TRUE);
+				HAL_Delay(100);
+				Led(LEDBLUE,FALSE);
+				HAL_Delay(500);
+			}
+		}break;
+		case ERROR_CONVERSION:
+		{
+			while(1)
+			{
+				Led(LEDRED2,TRUE); // Red2 led on
+				Led(LEDBLUE,TRUE); // 3x blue led blink
+				HAL_Delay(100);
+				Led(LEDBLUE,FALSE);
+				HAL_Delay(100);
+				Led(LEDBLUE,TRUE);
+				HAL_Delay(100);
+				Led(LEDBLUE,FALSE);
+				HAL_Delay(100);
+				Led(LEDBLUE,TRUE);
+				HAL_Delay(100);
+				Led(LEDBLUE,FALSE);
+				HAL_Delay(500);
+			}
+		}break;
+		case ERROR_THREAD:
+		{
+			while(1)
+			{
+				Led(LEDRED1,TRUE); // Red1 & Red2 leds on
+				Led(LEDRED2,TRUE);
+				Led(LEDBLUE,TRUE); // 3x blue led blink
+				HAL_Delay(100);
+				Led(LEDBLUE,FALSE);
+				HAL_Delay(100);
+				Led(LEDBLUE,TRUE);
+				HAL_Delay(100);
+				Led(LEDBLUE,FALSE);
+				HAL_Delay(100);
+				Led(LEDBLUE,TRUE);
+				HAL_Delay(100);
+				Led(LEDBLUE,FALSE);
+				HAL_Delay(500);
+			}
+		}break;
+		case ERROR_HARDFAULT:
 		{
 			while(1)
 			{
 				Led(LEDRED1,TRUE);
+				Led(LEDRED2,TRUE);
+				Led(LEDRED3,TRUE);
+				Led(LEDBLUE,TRUE); // 3x blue led blink
 				HAL_Delay(100);
-				Led(LEDRED1,FALSE);
+				Led(LEDBLUE,FALSE);
 				HAL_Delay(100);
-				Led(LEDRED1,TRUE);
+				Led(LEDBLUE,TRUE);
 				HAL_Delay(100);
-				Led(LEDRED1,FALSE);
+				Led(LEDBLUE,FALSE);
 				HAL_Delay(100);
-				Led(LEDRED1,TRUE);
+				Led(LEDBLUE,TRUE);
 				HAL_Delay(100);
-				Led(LEDRED1,FALSE);
+				Led(LEDBLUE,FALSE);
 				HAL_Delay(500);
 			}
-		}break;
-		case CONVERSION_ERROR:
+		}
+		default:
 		{
 			while(1)
 			{
-				Led(LEDRED2,TRUE);
-				HAL_Delay(100);
-				Led(LEDRED2,FALSE);
-				HAL_Delay(100);
-				Led(LEDRED2,TRUE);
-				HAL_Delay(100);
-				Led(LEDRED2,FALSE);
-				HAL_Delay(100);
-				Led(LEDRED2,TRUE);
-				HAL_Delay(100);
-				Led(LEDRED2,FALSE);
+				Leds_All_On();
+				HAL_Delay(500);
+				Leds_All_Off();
 				HAL_Delay(500);
 			}
-		}break;
+		}
 	}
 	
 	while(1){}

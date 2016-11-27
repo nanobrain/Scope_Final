@@ -15,8 +15,15 @@
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 typedef enum ERRCODE{
-	INIT_ERROR,
-	CONVERSION_ERROR
+	ERROR_INIT,
+	ERROR_CONVERSION,
+	ERROR_THREAD,
+	ERROR_HARDFAULT,
+	ERROR_MEMMANAGE,
+	ERROR_BUSFAULT,
+	ERROR_USAGEFAULT,
+	ERROR_DEBUGMON,
+	NMI_ERROR
 }ERRCODE;
 
 /* Exported constants --------------------------------------------------------*/

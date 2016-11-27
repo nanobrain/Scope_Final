@@ -39,6 +39,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "Error_Handler.h"
 #include "stm32f7xx_it.h"
 
 /** @addtogroup STM32F7xx_HAL_Examples
@@ -70,8 +71,7 @@ extern SPI_HandleTypeDef g_hspi;
   * @retval None
   */
 void NMI_Handler(void)
-{
-}
+{ Error_Handler(NMI_ERROR); }
 
 /**
   * @brief  This function handles Hard Fault exception.
@@ -79,12 +79,7 @@ void NMI_Handler(void)
   * @retval None
   */
 void HardFault_Handler(void)
-{
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
-}
+{ Error_Handler(ERROR_HARDFAULT); }
 
 /**
   * @brief  This function handles Memory Manage exception.
@@ -92,12 +87,7 @@ void HardFault_Handler(void)
   * @retval None
   */
 void MemManage_Handler(void)
-{
-  /* Go to infinite loop when Memory Manage exception occurs */
-  while (1)
-  {
-  }
-}
+{ Error_Handler(ERROR_MEMMANAGE); }
 
 /**
   * @brief  This function handles Bus Fault exception.
@@ -105,12 +95,7 @@ void MemManage_Handler(void)
   * @retval None
   */
 void BusFault_Handler(void)
-{
-  /* Go to infinite loop when Bus Fault exception occurs */
-  while (1)
-  {
-  }
-}
+{ Error_Handler(ERROR_BUSFAULT); }
 
 /**
   * @brief  This function handles Usage Fault exception.
@@ -118,12 +103,7 @@ void BusFault_Handler(void)
   * @retval None
   */
 void UsageFault_Handler(void)
-{
-  /* Go to infinite loop when Usage Fault exception occurs */
-  while (1)
-  {
-  }
-}
+{ Error_Handler(ERROR_USAGEFAULT); }
 
 /**
   * @brief  This function handles Debug Monitor exception.
@@ -131,8 +111,7 @@ void UsageFault_Handler(void)
   * @retval None
   */
 void DebugMon_Handler(void)
-{
-}
+{ Error_Handler(ERROR_DEBUGMON); }
 
 /******************************************************************************/
 /*                 STM32F7xx Peripherals Interrupt Handlers                   */

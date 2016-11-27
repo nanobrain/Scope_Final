@@ -45,6 +45,9 @@
 #include "Error_Handler.h"
 #include "Leds.h"
 #include "Relays.h"
+#include "GUI.h"
+#include "Board_Touch.h"                // ::Board Support:Touchscreen
+#include "stm32746g_discovery_sdram.h"  // Keil.STM32F746G-Discovery::Board Support:Drivers:SDRAM
 
 #ifdef _RTE_
 #include "RTE_Components.h"             // Component selection
@@ -107,6 +110,8 @@ int main(void)
      with several masters. */ 
   
 	/* Locals */
+	osThreadId tid_Main;
+	osStatus os_status;
 	
   /* Configure the MPU attributes as Write Through */
   MPU_Config();
@@ -125,14 +130,12 @@ int main(void)
        - Low Level Initialization
      */
   if( HAL_Init() != HAL_OK )
-		Error_Handler(INIT_ERROR);
-
+		Error_Handler(ERROR_INIT);
+		
   /* Configure the System clock to have a frequency of 216 MHz */
   SystemClock_Config();
 
-
-  /* Add your application code here
-     */
+  /* Initialize */
 	System_Init();
 	
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
@@ -141,34 +144,45 @@ int main(void)
 
   osKernelStart();                      // start thread execution 
 #endif
-		
+	
+	/* Test run */
 	Demo_Run();
+
+	/*tid_Main=osThreadGetId();
+	os_status = osThreadTerminate (tid_Main);
+	if (os_status != osOK)
+		Error_Handler(ERROR_THREAD);*/
+	
   /* Infinite loop */
   while (1) {}
 }
 
 static void System_Init(void)
 {
+	if( BSP_SDRAM_Init() != HAL_OK )
+		Error_Handler(ERROR_INIT);
+		
 	if( Init_spi() != HAL_OK )
-		Error_Handler(INIT_ERROR);
+		Error_Handler(ERROR_INIT);
 	
 	if( DAC_Init() != HAL_OK )
-		Error_Handler(INIT_ERROR);
+		Error_Handler(ERROR_INIT);
 	
 	if( VGA_Init() != HAL_OK )
-		Error_Handler(INIT_ERROR);
+		Error_Handler(ERROR_INIT);
 	
 	if( ADC_Init() != HAL_OK )
-		Error_Handler(INIT_ERROR);
+		Error_Handler(ERROR_INIT);
 	
 	if( Leds_Init() != HAL_OK )
-		Error_Handler(INIT_ERROR);
+		Error_Handler(ERROR_INIT);
 	
 	if( Relays_Init() != HAL_OK )
-		Error_Handler(INIT_ERROR);
+		Error_Handler(ERROR_INIT);
 	
 	if( Buttons_Initialize() != 0)
-		Error_Handler(INIT_ERROR);
+		Error_Handler(ERROR_INIT);
+
 }
 
 static void Demo_Run(void)
@@ -176,14 +190,9 @@ static void Demo_Run(void)
 	uint8_t cnt=0;
 	
 	while(Buttons_GetState() == 0){} // Start on button press
-		
-	while(Buttons_GetState()== 0)
-	{
+	HAL_Delay(50);
+	
 		Leds_All_Off();
-		
-		if( ADC_Receive() != HAL_OK )
-			Error_Handler(INIT_ERROR);
-		
 		HAL_Delay(1000);
 		Relay(REL_GND,TRUE);
 		Led(LEDRED1,1);
@@ -201,14 +210,18 @@ static void Demo_Run(void)
 		Led(LEDGREEN,1);
 		HAL_Delay(1000);
 		Relay(REL_ACDC,FALSE);
+		Leds_All_Off();
 		
+	do
+	{		
 		for(cnt=0;cnt<31;cnt++)
 		{
 			HAL_Delay(100);
 			Leds_Binary(cnt);
 		}
-	}
+	}while(Buttons_GetState()== 0);
 }
+
 /**
   * @brief  System Clock Configuration
   *         The system Clock is configured as follow : 
@@ -246,13 +259,13 @@ static void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLQ = 9;
   if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler(INIT_ERROR);
+    Error_Handler(ERROR_INIT);
   }
 
   /* activate the OverDrive to reach the 216 Mhz Frequency */
   if(HAL_PWREx_EnableOverDrive() != HAL_OK)
   {
-    Error_Handler(INIT_ERROR);
+    Error_Handler(ERROR_INIT);
   }
   
   /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 
@@ -264,7 +277,7 @@ static void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;  
   if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
   {
-    Error_Handler(INIT_ERROR);
+    Error_Handler(ERROR_INIT);
   }
 }
 
