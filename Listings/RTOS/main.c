@@ -130,7 +130,7 @@ int main(void)
        - Low Level Initialization
      */
   if( HAL_Init() != HAL_OK )
-		Error_Handler(ERROR_INIT);
+		Error_Handler(ERROR_HAL_INIT);
 		
   /* Configure the System clock to have a frequency of 216 MHz */
   SystemClock_Config();
@@ -159,6 +159,9 @@ int main(void)
 
 static void System_Init(void)
 {
+	if( Leds_Init() != HAL_OK )
+		Error_Handler(ERROR_INIT);
+		
 	if( BSP_SDRAM_Init() != HAL_OK )
 		Error_Handler(ERROR_INIT);
 		
@@ -172,9 +175,6 @@ static void System_Init(void)
 		Error_Handler(ERROR_INIT);
 	
 	if( ADC_Init() != HAL_OK )
-		Error_Handler(ERROR_INIT);
-	
-	if( Leds_Init() != HAL_OK )
 		Error_Handler(ERROR_INIT);
 	
 	if( Relays_Init() != HAL_OK )

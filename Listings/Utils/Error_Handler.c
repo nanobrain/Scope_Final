@@ -102,6 +102,36 @@ void Error_Handler(ERRCODE a_errCode)
 				Led(LEDBLUE,FALSE);
 				HAL_Delay(500);
 			}
+		}break;
+		case ERROR_HAL_INIT:
+		{
+			while(1)
+			{
+				Led(LEDRED1,TRUE);
+				Led(LEDRED2,TRUE);
+				Led(LEDRED3,TRUE); // 3x all red leds blink
+				HAL_Delay(100);
+				Led(LEDRED1,FALSE);
+				Led(LEDRED2,FALSE);
+				Led(LEDRED3,FALSE);
+				HAL_Delay(100);
+				Led(LEDRED1,TRUE);
+				Led(LEDRED2,TRUE);
+				Led(LEDRED3,TRUE);
+				HAL_Delay(100);
+				Led(LEDRED1,FALSE);
+				Led(LEDRED2,FALSE);
+				Led(LEDRED3,FALSE);
+				HAL_Delay(100);
+				Led(LEDRED1,TRUE);
+				Led(LEDRED2,TRUE);
+				Led(LEDRED3,TRUE);
+				HAL_Delay(100);
+				Led(LEDRED1,FALSE);
+				Led(LEDRED2,FALSE);
+				Led(LEDRED3,FALSE);
+				HAL_Delay(500);
+			}
 		}
 		default:
 		{
