@@ -55,28 +55,28 @@
 //   <i> Defines default stack size for threads with osThreadDef stacksz = 0
 //   <i> Default: 200
 #ifndef OS_STKSIZE
- #define OS_STKSIZE     50      // this stack size value is in words
+ #define OS_STKSIZE     256      // this stack size value is in words
 #endif
  
 //   <o>Main Thread stack size [bytes] <64-32768:8><#/4>
 //   <i> Defines stack size for main thread.
 //   <i> Default: 200
 #ifndef OS_MAINSTKSIZE
- #define OS_MAINSTKSIZE 50      // this stack size value is in words
+ #define OS_MAINSTKSIZE 512      // this stack size value is in words
 #endif
  
 //   <o>Number of threads with user-provided stack size <0-250>
 //   <i> Defines the number of threads with user-provided stack size.
 //   <i> Default: 0
 #ifndef OS_PRIVCNT
- #define OS_PRIVCNT     0
+ #define OS_PRIVCNT     1
 #endif
  
 //   <o>Total stack size [bytes] for threads with user-provided stack size <0-1048576:8><#/4>
 //   <i> Defines the combined stack size for threads with user-provided stack size.
 //   <i> Default: 0
 #ifndef OS_PRIVSTKSIZE
- #define OS_PRIVSTKSIZE 0       // this stack size value is in words
+ #define OS_PRIVSTKSIZE 1024       // this stack size value is in words
 #endif
  
 //   <q>Stack overflow checking
@@ -90,7 +90,7 @@
 //   <i> Initialize thread stack with watermark pattern for analyzing stack usage (current/maximum) in System and Thread Viewer.
 //   <i> Enabling this option increases significantly the execution time of osThreadCreate.
 #ifndef OS_STKINIT
-#define OS_STKINIT      0
+#define OS_STKINIT      1
 #endif
  
 //   <o>Processor mode for thread execution 
@@ -172,14 +172,14 @@
 //   <i> Defines stack size for Timer thread.
 //   <i> Default: 200
 #ifndef OS_TIMERSTKSZ
- #define OS_TIMERSTKSZ  50     // this stack size value is in words
+ #define OS_TIMERSTKSZ  256     // this stack size value is in words
 #endif
  
 //   <o>Timer Callback Queue size <1-32>
 //   <i> Number of concurrent active timer callback functions.
 //   <i> Default: 4
 #ifndef OS_TIMERCBQS
- #define OS_TIMERCBQS   4
+ #define OS_TIMERCBQS   8
 #endif
  
 // </e>
@@ -193,7 +193,7 @@
 //   <i> when they are called from the interrupt handler.
 //   <i> Default: 16 entries
 #ifndef OS_FIFOSZ
- #define OS_FIFOSZ      16
+ #define OS_FIFOSZ      48
 #endif
  
 // </h>

@@ -22,6 +22,8 @@
 
 void Error_Handler(ERRCODE a_errCode)
 {
+	Leds_All_Off();
+	
 	switch(a_errCode)
 	{
 		case ERROR_INIT:
@@ -137,9 +139,9 @@ void Error_Handler(ERRCODE a_errCode)
 		{
 			while(1)
 			{
-				Leds_All_On();
-				HAL_Delay(500);
 				Leds_All_Off();
+				HAL_Delay(500);
+				Leds_All_On();
 				HAL_Delay(500);
 			}
 		}

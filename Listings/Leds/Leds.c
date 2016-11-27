@@ -97,13 +97,12 @@ void Led(LEDS a_Led,uint8_t a_State)
 
 void Leds_Binary(uint8_t a_u8_Value)
 {
-	a_u8_Value = a_u8_Value << 3;
+	a_u8_Value = a_u8_Value << 4;
 	
 	Led(LEDRED1,a_u8_Value & 0x80);
 	Led(LEDRED2,a_u8_Value & 0x40);
 	Led(LEDRED3,a_u8_Value & 0x20);
 	Led(LEDBLUE,a_u8_Value & 0x10);
-	Led(LEDGREEN,a_u8_Value & 0x08);
 }
 
 void Leds_All_On()

@@ -147,14 +147,24 @@ int main(void)
 	
 	/* Test run */
 	Demo_Run();
-
+/*
+	GUI_Init();
+	GUI_SetColor(GUI_BLUE);
+	GUI_SetFont(&GUI_Font16_1);
+	GUI_DispStringHCenterAt("Oscyloskop cyfrowy v1.2" , 240, 150);
+	GUI_DispStringHCenterAt("Adrian Kurylak" , 240, 175);
+	GUI_DispStringHCenterAt("Politechnika Wroclawska" , 240, 200);
+	*/
 	/*tid_Main=osThreadGetId();
 	os_status = osThreadTerminate (tid_Main);
 	if (os_status != osOK)
 		Error_Handler(ERROR_THREAD);*/
 	
   /* Infinite loop */
-  while (1) {}
+  while (1) {
+		if( ADC_Receive() != HAL_OK )
+			Error_Handler(ERROR_CONVERSION);
+	}
 }
 
 static void System_Init(void)
@@ -183,6 +193,7 @@ static void System_Init(void)
 	if( Buttons_Initialize() != 0)
 		Error_Handler(ERROR_INIT);
 
+	Led(LEDGREEN,TRUE);
 }
 
 static void Demo_Run(void)
@@ -193,22 +204,22 @@ static void Demo_Run(void)
 	HAL_Delay(50);
 	
 		Leds_All_Off();
-		HAL_Delay(1000);
+		HAL_Delay(100);
 		Relay(REL_GND,TRUE);
 		Led(LEDRED1,1);
-		HAL_Delay(1000);
+		HAL_Delay(100);
 		Relay(REL_ATT,TRUE);
 		Led(LEDRED2,1);
-		HAL_Delay(1000);
+		HAL_Delay(100);
 		Relay(REL_ACDC,TRUE);
 		Led(LEDRED3,1);
-		HAL_Delay(1000);
+		HAL_Delay(100);
 		Relay(REL_GND,FALSE);
 		Led(LEDBLUE,1);
-		HAL_Delay(1000);
+		HAL_Delay(100);
 		Relay(REL_ATT,FALSE);
 		Led(LEDGREEN,1);
-		HAL_Delay(1000);
+		HAL_Delay(100);
 		Relay(REL_ACDC,FALSE);
 		Leds_All_Off();
 		
@@ -216,9 +227,10 @@ static void Demo_Run(void)
 	{		
 		for(cnt=0;cnt<31;cnt++)
 		{
-			HAL_Delay(100);
+			HAL_Delay(20);
 			Leds_Binary(cnt);
 		}
+		Leds_All_Off();
 	}while(Buttons_GetState()== 0);
 }
 

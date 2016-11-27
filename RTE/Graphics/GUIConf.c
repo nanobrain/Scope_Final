@@ -53,7 +53,8 @@ Purpose     : Display controller initialization
 //
 // Define the available number of bytes available for the GUI
 //
-#define GUI_NUMBYTES  0x200000
+#define GUI_NUMBYTES  			0x200000
+#define GUI_BUFFER_ADDRESS 	0xC0200000
 
 /*********************************************************************
 *
@@ -73,7 +74,7 @@ void GUI_X_Config(void) {
   //
   // 32 bit aligned memory area
   //
-  static U32 aMemory[GUI_NUMBYTES / 4];
+  static U32 aMemory[GUI_NUMBYTES / 4] __attribute__((at(GUI_BUFFER_ADDRESS)));
   //
   // Assign memory to emWin
   //
@@ -81,7 +82,7 @@ void GUI_X_Config(void) {
   //
   // Set default font
   //
-  GUI_SetDefaultFont(GUI_FONT_6X8);
+	GUI_SetDefaultFont(GUI_FONT_6X8);
 }
 
 /*************************** End of file ****************************/
