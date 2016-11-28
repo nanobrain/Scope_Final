@@ -18,6 +18,7 @@
 #include "main.h"
 #include "Relays.h"
 #include "Leds.h"
+#include "Threads.h"
 
 #ifdef _RTE_
 #include "RTE_Components.h"             // Component selection
@@ -27,12 +28,11 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+osThreadDef (GUIThread, osPriorityNormal, 1, 2048);
+
 /* Private function prototypes -----------------------------------------------*/
 static void Demo_Run(void);
 static void Display_HelloMsg(void);
-void GUIThread (void const *argument);              	// thread function
-osThreadId tid_GUIThread;                           	// thread id
-osThreadDef (GUIThread, osPriorityNormal, 1, 2048);   // thread object
 
 /* Private functions ---------------------------------------------------------*/
 int Init_GUIThread (void) {

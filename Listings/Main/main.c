@@ -67,8 +67,6 @@ uint32_t HAL_GetTick(void) {
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 extern SPI_HandleTypeDef g_hspi;
-uint8_t g_aRxBuffer[20];
-uint8_t g_aTxBuffer[20]="DUMMY";
 /* Private function prototypes -----------------------------------------------*/
 // MPU Initialization
 static void SystemClock_Config(void);
@@ -149,10 +147,7 @@ int main(void)
 		Error_Handler(ERROR_THREAD);
 	
   /* Infinite loop */
-  while (1) {/*
-		if( ADC_Receive() != HAL_OK )
-			Error_Handler(ERROR_CONVERSION);*/
-	}
+  while (1) {}
 }
 
 static void System_Init(void)

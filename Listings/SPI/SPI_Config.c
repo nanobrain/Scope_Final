@@ -15,6 +15,9 @@
 #include <stdlib.h>
 #define SPI_BUFFER 8
 
+uint8_t g_aRxBuffer[20];
+uint8_t g_aTxBuffer[20]="DUMMY";
+
 /****** Pin config ******/
 /************************/
 /***** MISO MOSI SCK ****/

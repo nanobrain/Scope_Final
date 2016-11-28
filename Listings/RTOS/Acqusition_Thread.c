@@ -1,21 +1,22 @@
 /**
   ******************************************************************************
-  * @file    RTOS\Heart_Beat_Thread.c 
+  * @file    RTOS\Acqusition_Thread.c 
   * @author  Adrian Kurylak
   * @version V1.0.0
   * @date    25-November-2016
-  * @brief   Simple status indication thread
+  * @brief   Main acquisition thread
   ******************************************************************************
   */
 
 /*----------------------------------------------------------------------------
- *      Heart_Beat_Thread:  Status thread
+ *      Acquisition_Thread:  ADC communication thread
  *---------------------------------------------------------------------------*/
  
-/* Includes ------------------------------------------------------------------*/
+ /* Includes ------------------------------------------------------------------*/
 #include "cmsis_os.h"                   // CMSIS RTOS header file
 #include "main.h"
-#include "Leds.h"
+#include "Error_Handler.h"
+#include "ADC_Config.h"
 #include "Threads.h"
 
 #ifdef _RTE_
@@ -26,25 +27,25 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-osThreadDef (Heart_Beat_Thread, osPriorityIdle, 1, 64);
+uint32_t values[480] __attribute__((at(0xC0400000)));
+osThreadDef (Acqusition_Thread, osPriorityNormal, 1, 0);
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-int Init_Heart_Beat_Thread (void) {
+int Init_Acqusition_Thread (void) {
 
-  tid_Heart_Beat_Thread = osThreadCreate (osThread(Heart_Beat_Thread), NULL);
-  if (!tid_Heart_Beat_Thread) return(-1);
+  tid_Acqusition_Thread = osThreadCreate (osThread(Acqusition_Thread), NULL);
+  if (!tid_Acqusition_Thread) return(-1);
   
   return(0);
 }
 
-void Heart_Beat_Thread (void const *argument) {
+void Acqusition_Thread (void const *argument) {
 
   while (1) {
-    Led(LEDGREEN,FALSE);
-		osDelay(1900);
-		Led(LEDGREEN,TRUE);
-		osDelay(100);
-    osThreadYield ();                                           // suspend thread
+		if( ADC_Receive() != HAL_OK )
+			Error_Handler(ERROR_CONVERSION);
+		
+    osThreadYield ();                                         // suspend thread
   }
 }
