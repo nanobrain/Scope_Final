@@ -1,6 +1,6 @@
  /**
   ******************************************************************************
-  * @file    Templates/Src/main.c 
+  * @file    Main\main.c 
   * @author  MCD Application Team
   * @version V1.0.3
   * @date    22-April-2016 
@@ -45,7 +45,6 @@
 #include "Error_Handler.h"
 #include "Leds.h"
 #include "Relays.h"
-#include "GUI.h"
 #include "Board_Touch.h"                // ::Board Support:Touchscreen
 #include "stm32746g_discovery_sdram.h"  // Keil.STM32F746G-Discovery::Board Support:Drivers:SDRAM
 
@@ -63,15 +62,6 @@ uint32_t HAL_GetTick(void) {
   return os_time; 
 }
 #endif
-
-/** @addtogroup STM32F7xx_HAL_Examples
-  * @{
-  */
-
-/** @addtogroup Templates
-  * @{
-  */ 
-
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -80,11 +70,13 @@ extern SPI_HandleTypeDef g_hspi;
 uint8_t g_aRxBuffer[20];
 uint8_t g_aTxBuffer[20]="DUMMY";
 /* Private function prototypes -----------------------------------------------*/
+// MPU Initialization
 static void SystemClock_Config(void);
 static void MPU_Config(void);
 static void CPU_CACHE_Enable(void);
+
+// Devices initializations
 static void System_Init(void);
-static void Demo_Run(void);
 extern HAL_StatusTypeDef Init_spi(void);
 extern HAL_StatusTypeDef DAC_Init(void);
 extern HAL_StatusTypeDef DAC_DeInit(void);
@@ -94,7 +86,9 @@ extern HAL_StatusTypeDef ADC_Init(void);
 extern HAL_StatusTypeDef ADC_DeInit(void);
 extern HAL_StatusTypeDef ADC_Receive(void);
 
-/* Private functions ---------------------------------------------------------*/
+// Threads initialization
+extern int Init_GUIThread(void);
+extern int Init_Heart_Beat_Thread (void);
 
 /**
   * @brief  Main program
@@ -139,38 +133,25 @@ int main(void)
 	System_Init();
 	
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
-  // create 'thread' functions that start executing,
-  // example: tid_name = osThreadCreate (osThread(name), NULL);
 
-	GUI_Init();
+	if( Init_GUIThread() ) // Init and run thread 1
+		Error_Handler(ERROR_GUI_INIT);
+	
+	if( Init_Heart_Beat_Thread() ) // Init and run thread 2
+		Error_Handler(ERROR_THREAD);
+	
   osKernelStart();                      // start thread execution 
 #endif
 	
-	/* Test run */
-	Demo_Run();
-/*
-	GUI_Init();
-	GUI_SetColor(GUI_BLUE);
-	GUI_SetFont(&GUI_Font16_1);
-	GUI_DispStringHCenterAt("Oscyloskop cyfrowy v1.2" , 240, 150);
-	GUI_DispStringHCenterAt("Adrian Kurylak" , 240, 175);
-	GUI_DispStringHCenterAt("Politechnika Wroclawska" , 240, 200);
-	*/
-	/*tid_Main=osThreadGetId();
+	tid_Main=osThreadGetId();
 	os_status = osThreadTerminate (tid_Main);
 	if (os_status != osOK)
-		Error_Handler(ERROR_THREAD);*/
+		Error_Handler(ERROR_THREAD);
 	
   /* Infinite loop */
-  while (1) {
+  while (1) {/*
 		if( ADC_Receive() != HAL_OK )
-			Error_Handler(ERROR_CONVERSION);
-		
-		if(Buttons_GetState() == 0)
-			Relay(REL_GND,TRUE);
-		else
-			Relay(REL_GND,FALSE);
-			
+			Error_Handler(ERROR_CONVERSION);*/
 	}
 }
 
@@ -201,44 +182,6 @@ static void System_Init(void)
 		Error_Handler(ERROR_INIT);
 
 	Led(LEDGREEN,TRUE);
-}
-
-static void Demo_Run(void)
-{
-	uint8_t cnt=0;
-	
-	while(Buttons_GetState() == 0){} // Start on button press
-	HAL_Delay(50);
-	
-		Leds_All_Off();
-		HAL_Delay(100);
-		Relay(REL_GND,TRUE);
-		Led(LEDRED1,1);
-		HAL_Delay(100);
-		Relay(REL_ATT,TRUE);
-		Led(LEDRED2,1);
-		HAL_Delay(100);
-		Relay(REL_ACDC,TRUE);
-		Led(LEDRED3,1);
-		HAL_Delay(100);
-		Relay(REL_GND,FALSE);
-		Led(LEDBLUE,1);
-		HAL_Delay(100);
-		Relay(REL_ATT,FALSE);
-		Led(LEDGREEN,1);
-		HAL_Delay(100);
-		Relay(REL_ACDC,FALSE);
-		Leds_All_Off();
-		
-	do
-	{		
-		for(cnt=0;cnt<31;cnt++)
-		{
-			HAL_Delay(20);
-			Leds_Binary(cnt);
-		}
-		Leds_All_Off();
-	}while(Buttons_GetState()== 0);
 }
 
 /**
@@ -367,13 +310,5 @@ void assert_failed(uint8_t* file, uint32_t line)
   }
 }
 #endif
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

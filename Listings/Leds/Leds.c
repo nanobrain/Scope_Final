@@ -4,7 +4,7 @@
   * @author  Adrian Kurylak
   * @version V1.0.0
   * @date    25-November-2016
-  * @brief   Relays configuration
+  * @brief   Leds configuration
   ******************************************************************************
   */
 
@@ -52,7 +52,8 @@ HAL_StatusTypeDef Leds_Init(void)
 	
 	GPIO_InitStructure.Pin = LEDGREEN_PIN;
 	HAL_GPIO_Init(LEDGREEN_GPIO_PORT,&GPIO_InitStructure);
-		
+	
+	Led(LEDGREEN,TRUE); // Turn on status led
 	
 	return HAL_OK;
 }
@@ -114,11 +115,5 @@ void Leds_All_Off()
 {
 	Leds_Binary(0);
 }
-
-/*
-// Implement this in another thread
-void Led_Blinking_Start(){}
-void Led_Blinking_Stop(){}
-*/
 
 /**** END OF FILE ****/

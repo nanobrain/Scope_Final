@@ -64,6 +64,7 @@ void Error_Handler(ERRCODE a_errCode)
 				HAL_Delay(500);
 			}
 		}break;
+		case ERROR_GUI_INIT:
 		case ERROR_THREAD:
 		{
 			while(1)
