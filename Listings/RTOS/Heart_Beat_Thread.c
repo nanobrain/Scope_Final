@@ -26,7 +26,8 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-osThreadDef (Heart_Beat_Thread, osPriorityIdle, 1, 64);
+osThreadId tid_Heart_Beat_Thread;
+osThreadDef (Heart_Beat_Thread, osPriorityIdle, 1, 128);
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/

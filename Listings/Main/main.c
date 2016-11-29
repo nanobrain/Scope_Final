@@ -41,19 +41,21 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
+#ifdef _RTE_
+#include "RTE_Components.h"             // Component selection
+#endif
+
+#ifdef RTE_CMSIS_RTOS                   // when RTE component CMSIS RTOS is used
+#include "cmsis_os.h"                   // CMSIS RTOS header file
+#endif
+
 #include "main.h"
 #include "Error_Handler.h"
 #include "Leds.h"
 #include "Relays.h"
+#include "Threads.h"
 #include "Board_Touch.h"                // ::Board Support:Touchscreen
 #include "stm32746g_discovery_sdram.h"  // Keil.STM32F746G-Discovery::Board Support:Drivers:SDRAM
-
-#ifdef _RTE_
-#include "RTE_Components.h"             // Component selection
-#endif
-#ifdef RTE_CMSIS_RTOS                   // when RTE component CMSIS RTOS is used
-#include "cmsis_os.h"                   // CMSIS RTOS header file
-#endif
 
 #ifdef RTE_CMSIS_RTOS_RTX
 extern uint32_t os_time;
@@ -83,10 +85,6 @@ extern HAL_StatusTypeDef VGA_DeInit(void);
 extern HAL_StatusTypeDef ADC_Init(void);
 extern HAL_StatusTypeDef ADC_DeInit(void);
 extern HAL_StatusTypeDef ADC_Receive(void);
-
-// Threads initialization
-extern int Init_GUIThread(void);
-extern int Init_Heart_Beat_Thread (void);
 
 /**
   * @brief  Main program
@@ -131,12 +129,16 @@ int main(void)
 	System_Init();
 	
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
-
-	if( Init_GUIThread() ) // Init and run thread 1
-		Error_Handler(ERROR_GUI_INIT);
 	
-	if( Init_Heart_Beat_Thread() ) // Init and run thread 2
+	if( Init_Acqusition_Thread() != 0 ) 	// Init and run thread 1
 		Error_Handler(ERROR_THREAD);
+	
+	if( Init_Heart_Beat_Thread() != 0 ) 	// Init and run thread 2
+		Error_Handler(ERROR_THREAD);
+
+	if( Init_GUIThread() != 0 ) 					// Init and run thread 3
+		Error_Handler(ERROR_GUI_INIT);
+
 	
   osKernelStart();                      // start thread execution 
 #endif

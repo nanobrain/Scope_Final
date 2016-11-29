@@ -24,7 +24,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 extern SPI_HandleTypeDef g_hspi;
-uint8_t g_8u_SamplesBuffer[480];
+uint8_t g_8u_SamplesBuffer[2048]; // Main acquisition buffer
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/

@@ -8,3 +8,4 @@ TODO:
 ## On every DeInit mehtod call check if You can disable clk for GPIO port
 # Create API for scope
 # Implement tdio functionality through SWV - Serial Wire Viewer
+# Use struct for screen dimmension. ie. for Draw_GraphGrid

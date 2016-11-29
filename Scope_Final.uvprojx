@@ -333,9 +333,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define></Define>
+              <Define>OS_STKCHECK</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Listings;.\Listings\ADC;.\Listings\RTOS;.\Listings\DAC;.\Listings\SPI;.\Listings\Leds;.\Listings\Relays;.\Listings\Utils</IncludePath>
+              <IncludePath>.\Listings;.\Listings\ADC;.\Listings\RTOS;.\Listings\DAC;.\Listings\SPI;.\Listings\Leds;.\Listings\Relays;.\Listings\Utils;.\Listings\Main</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -377,17 +377,87 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>RTOS</GroupName>
+          <GroupName>Main</GroupName>
           <Files>
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Listings\RTOS\main.c</FilePath>
+              <FilePath>.\Listings\Main\main.c</FilePath>
             </File>
             <File>
               <FileName>main.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\Listings\RTOS\main.h</FilePath>
+              <FilePath>.\Listings\Main\main.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>RTOS</GroupName>
+          <Files>
+            <File>
+              <FileName>GUI_Thread.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Listings\RTOS\GUI_Thread.c</FilePath>
+            </File>
+            <File>
+              <FileName>Heart_Beat_Thread.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Listings\RTOS\Heart_Beat_Thread.c</FilePath>
+            </File>
+            <File>
+              <FileName>Acqusition_Thread.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Listings\RTOS\Acqusition_Thread.c</FilePath>
+            </File>
+            <File>
+              <FileName>Threads.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Listings\RTOS\Threads.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Utils</GroupName>
+          <Files>
+            <File>
+              <FileName>Error_Handler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Listings\Utils\Error_Handler.c</FilePath>
+            </File>
+            <File>
+              <FileName>Error_Handler.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Listings\Utils\Error_Handler.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Leds</GroupName>
+          <Files>
+            <File>
+              <FileName>Leds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Listings\Leds\Leds.c</FilePath>
+            </File>
+            <File>
+              <FileName>Leds.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Listings\Leds\Leds.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Relays</GroupName>
+          <Files>
+            <File>
+              <FileName>Relays.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Listings\Relays\Relays.c</FilePath>
+            </File>
+            <File>
+              <FileName>Relays.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Listings\Relays\Relays.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -457,21 +527,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Utils</GroupName>
-          <Files>
-            <File>
-              <FileName>Error_Handler.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Listings\Utils\Error_Handler.c</FilePath>
-            </File>
-            <File>
-              <FileName>Error_Handler.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Listings\Utils\Error_Handler.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>Documents</GroupName>
           <Files>
             <File>
@@ -480,39 +535,6 @@
               <FilePath>.\ReadMe.txt</FilePath>
             </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>Relays</GroupName>
-          <Files>
-            <File>
-              <FileName>Relays.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Listings\Relays\Relays.c</FilePath>
-            </File>
-            <File>
-              <FileName>Relays.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Listings\Relays\Relays.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Leds</GroupName>
-          <Files>
-            <File>
-              <FileName>Leds.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Listings\Leds\Leds.c</FilePath>
-            </File>
-            <File>
-              <FileName>Leds.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Listings\Leds\Leds.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>GUI</GroupName>
         </Group>
         <Group>
           <GroupName>::Board Support</GroupName>

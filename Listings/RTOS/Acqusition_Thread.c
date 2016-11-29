@@ -27,13 +27,20 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint32_t values[480] __attribute__((at(0xC0400000)));
-osThreadDef (Acqusition_Thread, osPriorityNormal, 1, 0);
+extern uint8_t g_8u_SamplesBuffer[1024]; // Main acquisition buffer
+osThreadId tid_Acqusition_Thread;
+osMutexId mid_Acquisition;
+osThreadDef (Acqusition_Thread, osPriorityHigh, 1, 1024);
+osMutexDef (m_Acquisition);
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 int Init_Acqusition_Thread (void) {
 
+	mid_Acquisition = osMutexCreate (osMutex (m_Acquisition));
+  if (!mid_Acquisition)
+    return(-2);
+	
   tid_Acqusition_Thread = osThreadCreate (osThread(Acqusition_Thread), NULL);
   if (!tid_Acqusition_Thread) return(-1);
   
@@ -43,9 +50,16 @@ int Init_Acqusition_Thread (void) {
 void Acqusition_Thread (void const *argument) {
 
   while (1) {
+		
+		/* Critical section */
+		osMutexWait(mid_Acquisition,osWaitForever);
+		
 		if( ADC_Receive() != HAL_OK )
 			Error_Handler(ERROR_CONVERSION);
 		
+		osMutexRelease(mid_Acquisition);
+		/* END of critical section */
     osThreadYield ();                                         // suspend thread
+		
   }
 }
