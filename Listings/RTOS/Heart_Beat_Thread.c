@@ -27,7 +27,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 osThreadId tid_Heart_Beat_Thread;
-osThreadDef (Heart_Beat_Thread, osPriorityIdle, 1, 128);
+osThreadDef (Heart_Beat_Thread, TH_HEARTBEATPRIORITY, 1, TH_HEARTBEATSTACK);
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/

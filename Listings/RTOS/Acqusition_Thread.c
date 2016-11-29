@@ -30,7 +30,7 @@
 extern uint8_t g_8u_SamplesBuffer[1024]; // Main acquisition buffer
 osThreadId tid_Acqusition_Thread;
 osMutexId mid_Acquisition;
-osThreadDef (Acqusition_Thread, osPriorityHigh, 1, 1024);
+osThreadDef (Acqusition_Thread, TH_ACQUISITIONPRIORITY, 1, TH_ACQUISITIONSTACK);
 osMutexDef (m_Acquisition);
 
 /* Private function prototypes -----------------------------------------------*/
@@ -49,6 +49,7 @@ int Init_Acqusition_Thread (void) {
 
 void Acqusition_Thread (void const *argument) {
 
+	osSignalWait(sid_GuiInitialized,osWaitForever);
   while (1) {
 		
 		/* Critical section */

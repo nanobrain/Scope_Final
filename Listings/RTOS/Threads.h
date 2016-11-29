@@ -18,22 +18,32 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Threads declarations  -----------------------------------------------------*/
 /* Heart beat thread */
+#define TH_HEARTBEATPRIORITY 			osPriorityLow
+#define TH_HEARTBEATSTACK					128
 int Init_Heart_Beat_Thread (void);
 void Heart_Beat_Thread (void const *argument);
-extern osThreadId tid_Heart_Beat_Thread;
 
 /* GUI thread */
+#define TH_GUIPRIORITY 						osPriorityNormal
+#define TH_GUISTACK								2048
 int Init_GUIThread (void);
 void GUIThread (void const *argument);
-extern osThreadId tid_GUIThread;
 
 /* Acquisiion thread */
+#define TH_ACQUISITIONPRIORITY		osPriorityHigh
+#define TH_ACQUISITIONSTACK				1024
 int Init_Acqusition_Thread (void);
 void Acqusition_Thread (void const *argument);
-extern osThreadId tid_Acqusition_Thread;
 
 /* Threads items -------------------------------------------------------------*/
+/* Threads IDs */
+extern osThreadId tid_GUIThread;
+extern osThreadId tid_Heart_Beat_Thread;
+extern osThreadId tid_Acqusition_Thread;
+/* Mutexes */
 extern osMutexId mid_Acquisition;
+/* Signals */
+#define sid_GuiInitialized	0x01
 
 #endif /* __THREADS_H */
 

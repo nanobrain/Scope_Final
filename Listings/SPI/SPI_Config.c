@@ -47,6 +47,7 @@ HAL_StatusTypeDef Init_spi()
 	g_hspi.Init.CLKPolarity = SPI_POLARITY_HIGH;
 	g_hspi.Init.CLKPhase = SPI_PHASE_1EDGE;
 	g_hspi.Init.NSS = SPI_NSS_SOFT;
+	//g_hspi.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
 	g_hspi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
 	g_hspi.Init.FirstBit = SPI_FIRSTBIT_MSB;
 	g_hspi.Init.TIMode = SPI_TIMODE_DISABLE;
