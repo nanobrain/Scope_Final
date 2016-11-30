@@ -23,7 +23,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-extern SPI_HandleTypeDef g_hspi;
+extern SPI_HandleTypeDef g_hSpi;
 uint8_t g_8u_SamplesBuffer[2048]; // Main acquisition buffer
 
 /* Private function prototypes -----------------------------------------------*/
@@ -34,7 +34,7 @@ HAL_StatusTypeDef ADC_Init(void)
 	HAL_StatusTypeDef errCode=HAL_OK;
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
-	if( HAL_SPI_GetState(&g_hspi) != HAL_SPI_STATE_RESET )// If SPI initialized
+	if( HAL_SPI_GetState(&g_hSpi) != HAL_SPI_STATE_RESET )// If SPI initialized
 	{
 		ADC_GPIO_CLK_ENABLE();
 		GPIO_InitStructure.Pin = ADC_SPIx_CS_PIN;
@@ -66,13 +66,13 @@ HAL_StatusTypeDef ADC_Receive(void)
 	uint16_t u16_dataCtr;
 	uint8_t u8_Buffer[2];
 	
-	if( HAL_SPI_GetState(&g_hspi) != HAL_SPI_STATE_RESET )// If SPI initialized
+	if( HAL_SPI_GetState(&g_hSpi) != HAL_SPI_STATE_RESET )// If SPI initialized
 	{
 		while (u16_dataCtr++ < u16_bufferSize)
 		{
 			ADC_CS_Write(FALSE);
-			errCode = HAL_SPI_Receive_DMA(&g_hspi,u8_Buffer,2);
-			while(HAL_SPI_GetState(&g_hspi) == HAL_SPI_STATE_BUSY_RX ) {}
+			errCode = HAL_SPI_Receive_IT(&g_hSpi,u8_Buffer,2);
+			while(HAL_SPI_GetState(&g_hSpi) == HAL_SPI_STATE_BUSY_RX ) {}
 			ADC_CS_Write(TRUE);
 		}
 	}

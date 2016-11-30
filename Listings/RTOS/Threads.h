@@ -24,7 +24,7 @@ int Init_Heart_Beat_Thread (void);
 void Heart_Beat_Thread (void const *argument);
 
 /* GUI thread */
-#define TH_GUIPRIORITY 						osPriorityNormal
+#define TH_GUIPRIORITY 						osPriorityHigh
 #define TH_GUISTACK								2048
 int Init_GUIThread (void);
 void GUIThread (void const *argument);

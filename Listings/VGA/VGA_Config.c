@@ -25,7 +25,7 @@
 /* Private variables ---------------------------------------------------------*/
 static uint8_t u8_txBuffer[3];
 static uint8_t u8_CurrentGain=0;
-extern SPI_HandleTypeDef g_hspi;
+extern SPI_HandleTypeDef g_hSpi;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -35,7 +35,7 @@ HAL_StatusTypeDef VGA_Init(void)
 	HAL_StatusTypeDef errCode=HAL_OK;
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
-	if( HAL_SPI_GetState(&g_hspi) != HAL_SPI_STATE_RESET )// If SPI initialized
+	if( HAL_SPI_GetState(&g_hSpi) != HAL_SPI_STATE_RESET )// If SPI initialized
 	{
 		VGA_GPIO_CLK_ENABLE();
 		GPIO_InitStructure.Pin = VGA_SPIx_CS_PIN;
@@ -105,11 +105,11 @@ VGA_POWER_MODE Get_VGA_Power_Mode(void)
 static HAL_StatusTypeDef VGA_Transmit(uint8_t*  a_p8u_Data)
 {
 	HAL_StatusTypeDef errCode=HAL_OK;
-	if( HAL_SPI_GetState(&g_hspi) != HAL_SPI_STATE_RESET )// If SPI initialized
+	if( HAL_SPI_GetState(&g_hSpi) != HAL_SPI_STATE_RESET )// If SPI initialized
 	{
 		VGA_CS_Write(FALSE);
-		errCode = HAL_SPI_Transmit_DMA(&g_hspi,a_p8u_Data,BUFFERSIZE(a_p8u_Data));
-		while(HAL_SPI_GetState(&g_hspi) == HAL_SPI_STATE_BUSY_TX ) {}
+		errCode = HAL_SPI_Transmit_DMA(&g_hSpi,a_p8u_Data,BUFFERSIZE(a_p8u_Data));
+		while(HAL_SPI_GetState(&g_hSpi) == HAL_SPI_STATE_BUSY_TX ) {}
 		VGA_CS_Write(TRUE);
 	}
 	else

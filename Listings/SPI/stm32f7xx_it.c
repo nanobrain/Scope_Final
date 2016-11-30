@@ -57,7 +57,7 @@
 extern uint8_t g_aRxBuffer[10];
 extern uint8_t g_aTxBuffer[10];
 /* SPI handler declared in "main.c" file */
-extern SPI_HandleTypeDef g_hspi;
+extern SPI_HandleTypeDef g_hSpi;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -126,7 +126,7 @@ void DebugMon_Handler(void)
   */
 void SPIx_IRQHandler(void)
 {
-  HAL_SPI_IRQHandler(&g_hspi);
+  HAL_SPI_IRQHandler(&g_hSpi);
 }
 
 /**
@@ -136,7 +136,7 @@ void SPIx_IRQHandler(void)
   */
 void SPIx_DMA_RX_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(g_hspi.hdmarx);
+  HAL_DMA_IRQHandler(g_hSpi.hdmarx);
 }
 
 /**
@@ -146,7 +146,7 @@ void SPIx_DMA_RX_IRQHandler(void)
   */
 void SPIx_DMA_TX_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(g_hspi.hdmatx);
+  HAL_DMA_IRQHandler(g_hSpi.hdmatx);
 }
 
 /**

@@ -68,7 +68,7 @@ uint32_t HAL_GetTick(void) {
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-extern SPI_HandleTypeDef g_hspi;
+extern SPI_HandleTypeDef g_hSpi;
 /* Private function prototypes -----------------------------------------------*/
 // MPU Initialization
 static void SystemClock_Config(void);
