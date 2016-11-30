@@ -52,8 +52,8 @@ typedef enum LOGIC{
 
 /* Exported constants --------------------------------------------------------*/
 /* Defines */
-#define SPI_DMA							1
-#define FAKE_WAVEFORM 			0
+#define SPI_DMA							TRUE
+#define FAKE_WAVEFORM 			FALSE
 #define RX_BUFFERSIZE				1024
 #define RX_FAKEBUFFERSIZE		1024
 
