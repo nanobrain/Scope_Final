@@ -1453,7 +1453,7 @@
 #endif
 
 //   <o> SPI2_NSS Pin <0=>Not Used <1=>PB4 <2=>PB9 <3=>PB12 <4=>PI0 <5=>PA11
-#define RTE_SPI2_NSS_PORT_ID            0
+#define RTE_SPI2_NSS_PORT_ID            2
 #if    (RTE_SPI2_NSS_PORT_ID == 0)
 #define RTE_SPI2_NSS_PIN                0
 #elif  (RTE_SPI2_NSS_PORT_ID == 1)

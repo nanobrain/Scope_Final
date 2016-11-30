@@ -28,6 +28,7 @@ static void ADC_CS_Write(LOGIC a_SetReset);
 HAL_StatusTypeDef ADC_Receive(void);
 HAL_StatusTypeDef ADC_Init(void);
 HAL_StatusTypeDef ADC_DeInit(void);
+uint8_t ADC_Is_Received(void);
 
 #endif /* __ADC_CONFIG_H */
 
