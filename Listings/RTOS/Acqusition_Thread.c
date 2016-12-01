@@ -28,16 +28,11 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+// Threads items
 osThreadId tid_Acqusition_Thread;
 osMutexId mid_Acquisition;
 osThreadDef (Acqusition_Thread, TH_ACQUISITIONPRIORITY, 1, TH_ACQUISITIONSTACK);
 osMutexDef (m_Acquisition);
-
-#if FAKE_WAVEFORM
-	extern uint8_t g_8u_SamplesBuffer[RX_FAKEBUFFERSIZE];
-#else
-	extern uint8_t g_8u_SamplesBuffer[RX_BUFFERSIZE];
-#endif
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -57,27 +52,26 @@ void Acqusition_Thread (void const *argument) {
 
 	osSignalWait(sid_GuiInitialized,osWaitForever);
   while (1) {
-		/* Critical section */
 		osMutexWait(mid_Acquisition,osWaitForever);
-
-		if (Buttons_GetState() == 0)
-			Relay(REL_GND,FALSE);
-		else
-			Relay(REL_GND,TRUE);
+		/* Critical section */
+		{
+			if (Buttons_GetState() == 0)
+				Relay(REL_GND,FALSE);
+			else
+				Relay(REL_GND,TRUE);
+				
+			#if FAKE_WAVEFORM == 0
 			
-		#if FAKE_WAVEFORM == 0
-		
-		if( ADC_Receive() != HAL_OK )
-			Error_Handler(ERROR_CONVERSION);
-		
-		while(ADC_Is_Received())
-			osDelay(1);
-		
-		#endif
-		
+			if( ADC_Receive() != HAL_OK )
+				Error_Handler(ERROR_CONVERSION);
+			
+			while(ADC_Is_Received()) {}
+			
+			#endif
+		}
+		/* END of critical section */
 		osMutexRelease(mid_Acquisition); 	// ATT: Mutex can be released here ONLY if ADC_Receive is blocking!
 																			// Mutex cannot be released until acquisition finish!
-		/* END of critical section */
     osThreadYield ();                                         // suspend thread
 		
   }

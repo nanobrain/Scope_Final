@@ -75,4 +75,11 @@ void Relay(RELAY a_Relay,LOGIC a_State)
 	}
 }
 
+void Relays_Default()
+{
+	Relay(REL_GND,FALSE);
+	Relay(REL_ATT,TRUE);
+	Relay(REL_ACDC,FALSE);
+}
+
 /**** END OF FILE ****/

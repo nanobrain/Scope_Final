@@ -130,10 +130,10 @@ int main(void)
 	
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
 	
-	if( Init_Acqusition_Thread() != 0 ) 	// Init and run thread 1
+	if( Init_Heart_Beat_Thread() != 0 ) 	// Init and run thread 1
 		Error_Handler(ERROR_THREAD);
-	
-	if( Init_Heart_Beat_Thread() != 0 ) 	// Init and run thread 2
+		
+	if( Init_Acqusition_Thread() != 0 ) 	// Init and run thread 2
 		Error_Handler(ERROR_THREAD);
 
 	if( Init_GUIThread() != 0 ) 					// Init and run thread 3

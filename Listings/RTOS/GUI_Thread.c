@@ -21,7 +21,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "cmsis_os.h"                   // CMSIS RTOS header file
 #include "GUI.h"
+#include "HEADER.h"
+#include "FRAMEWIN.h"
+#include "DIALOG.h"
 #include "main.h"
+#include "ADC_Config.h"
 #include "Relays.h"
 #include "Leds.h"
 #include "Threads.h"
@@ -32,38 +36,69 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+/* Windows IDs */
+#define GUI_HDLG_ID_FRAMEWIN 1
+#define GUI_HDLG_ID_GRAPH_WIN 2
+
+/* Screen & windows sizes */
 #define SCREENSIZEX				480
 #define SCREENSIZEY				272
-#define USERSPACESTARTX		GRIDENDX
-#define USERSPACESTARTY		GRIDSTARTY
+#define USERSPACESTARTX		GRAPHENDX
+#define USERSPACESTARTY		GRAPHSTARTY
 #define USERSPACESIZEX		USERSPACEENDX-USERSPACESTARTX
 #define USERSPACESIZEY		USERSPACEENDY-USERSPACESTARTY
 #define USERSPACEENDX			SCREENSIZEX
 #define USERSPACEENDY			SCREENSIZEY
-#define GRIDCOUNTX 				10
-#define GRIDCOUNTY				8
-#define GRIDUNITSIZE			34
-#define GRIDSIZEX					GRIDCOUNTX*GRIDUNITSIZE
-#define GRIDSIZEY					GRIDCOUNTY*GRIDUNITSIZE
-#define GRIDSTARTX				0
-#define GRIDSTARTY				0
-#define GRIDENDX					GRIDSTARTX + GRIDSIZEX
-#define GRIDENDY					GRIDSTARTY + GRIDSIZEY
+#define GRIDLS						GUI_LS_DOT
+#define GRAPHCOUNTX 			12
+#define GRAPHCOUNTY				8
+#define GRAPHUNITSIZE			34
+#define GRAPHSIZEX				GRAPHCOUNTX*GRAPHUNITSIZE
+#define GRAPHSIZEY				GRAPHCOUNTY*GRAPHUNITSIZE
+#define GRAPHSTARTX				GRAPHUNITSIZE
+#define GRAPHSTARTY				0
+#define GRAPHENDX					GRAPHSTARTX + GRAPHSIZEX
+#define GRAPHENDY					GRAPHSTARTY + GRAPHSIZEY
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+
+//
+// Graph data handle
+//
+static GRAPH_DATA_Handle _hGraphData;
+
+//
+// Colors to be used in graph window
+//
+typedef struct GUI_Colors{
+	GUI_COLOR BackGround;
+	GUI_COLOR GraphBackGround;
+	GUI_COLOR Grid;
+	GUI_COLOR Label;
+	GUI_COLOR Border;
+	GUI_COLOR Frame;
+	GUI_COLOR Waveform;
+}GUI_Colors;
+
+static GUI_Colors _GuiColors;
+
+//
+// Dialog resource
+//
+static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
+  {	WINDOW_CreateIndirect,		"Background_Window",		0,							0,	0,	SCREENSIZEX,		SCREENSIZEY		},
+	{	GRAPH_CreateIndirect,			0,											GUI_ID_GRAPH0,	0,	0,	GRAPHSIZEX,		GRAPHSIZEY			},
+};
+
+// Threads items
 osThreadId tid_GUIThread;
 osThreadDef (GUIThread, TH_GUIPRIORITY, 1, TH_GUISTACK);
 
-#if FAKE_WAVEFORM
-	extern uint8_t g_8u_SamplesBuffer[RX_FAKEBUFFERSIZE];
-#else
-	extern uint8_t g_8u_SamplesBuffer[RX_BUFFERSIZE];
-#endif
-
 /* Private function prototypes -----------------------------------------------*/
 static uint16_t Trigger(uint8_t Trig_SP, volatile unsigned short* Signal, uint16_t Sig_Size );
-static void Draw_GraphGrid(uint16_t a_XSize, uint16_t a_YSize,uint16_t a_XStart,uint16_t a_YStart, uint16_t a_XDense, uint16_t a_YDense);
+static void Draw_GraphGrid(WM_HWIN hDlg_GRAPH, uint16_t a_XSize, uint16_t a_YSize, uint16_t a_XDense, uint16_t a_YDense);
+static void _cbCallback(WM_MESSAGE * pMsg);
 static void Demo_Run(void);
 static void Display_HelloMsg(void);
 
@@ -77,54 +112,109 @@ int Init_GUIThread (void) {
 }
 
 void GUIThread (void const *argument) {
+	WM_HWIN hDlg;
+	WM_HWIN hGraph;
+	WM_HTIMER Refresh_TIM;
+	uint16_t i;
 	GUI_MEMDEV_Handle hMem0,hMem1;
+	GUI_RECT Client_Rect;
 
   GUI_Init();                     /* Initialize the Graphics Component */
 	/* Hello message */
 	Display_HelloMsg();
 	/* Test run */
-	Demo_Run();
+	//Demo_Run();
+	/* Relays in safe position */
+	Relays_Default();
 	
-	GUI_Clear();
+	/* Define GUI colors */
+	_GuiColors.BackGround 			= GUI_LIGHTGRAY;
+	_GuiColors.Border 					= GUI_DARKBLUE;
+	_GuiColors.Frame 						= GUI_BLACK;
+	_GuiColors.GraphBackGround 	= GUI_BLACK;
+	_GuiColors.Grid 						= GUI_GRAY;
+	_GuiColors.Label 						= GUI_WHITE;
+	_GuiColors.Waveform					= GUI_GREEN;
+	
+	hDlg = GUI_CreateDialogBox(_aDialogCreate, GUI_COUNTOF(_aDialogCreate), _cbCallback, 0, 0, 0);	
+	hGraph = WM_GetDialogItem(hDlg, GUI_ID_GRAPH0);
+	Refresh_TIM = WM_CreateTimer(hGraph, GUI_ID_USER, 20, 0);
+	WM_EnableMemdev(hGraph);
+	//WM_SetCreateFlags(WM_CF_MEMDEV);
+	WM_GetClientRectEx(hDlg,&Client_Rect);
 	
 	/* Indicate full initialization finish */
 	osSignalSet(tid_Acqusition_Thread,sid_GuiInitialized);
-
-	/* Draw GUI */
-	hMem0 = GUI_MEMDEV_Create(GRIDSTARTX,GRIDSTARTY,GRIDSIZEX,GRIDSIZEY);
-	hMem1 = GUI_MEMDEV_Create(USERSPACESTARTX,USERSPACESTARTY,USERSPACESIZEX,USERSPACESIZEY);
 	
-	GUI_SelectLayer(0);
-	GUI_MEMDEV_Select(hMem1);
-	GUI_MEMDEV_Clear(hMem1);
-	GUI_SetColor(GUI_ORANGE);
-	GUI_FillRect(USERSPACESTARTX,USERSPACESTARTY,USERSPACEENDX,USERSPACEENDY);
-	GUI_SetColor(GUI_BLACK);	
-	
+	GUI_Clear();
+	GUI_CURSOR_Show();
   while (1) {
-		GUI_MEMDEV_Select(hMem0);
-		GUI_MEMDEV_Clear(hMem0);
-		
-		/* Critical section */
 		osMutexWait(mid_Acquisition,osWaitForever);
-		
-		GUI_SetColor(GUI_WHITE);
-		GUI_FillRect(GRIDSTARTX,GRIDSTARTY,GRIDENDX,GRIDENDY);
-		
-		Draw_GraphGrid(GRIDSIZEX,GRIDSIZEY,GRIDSTARTX,GRIDSTARTY,GRIDUNITSIZE,GRIDUNITSIZE);
-		
-		GUI_SetColor(GUI_BLUE);
-		GUI_DrawGraph((short*)g_8u_SamplesBuffer,GRIDSIZEX,GRIDSTARTX,GRIDSTARTY/2);
-	
-		osMutexRelease(mid_Acquisition);
+		/* Critical section */
+		{
+			GRAPH_DATA_YT_Clear(_hGraphData);
+			
+			for(i=0;i<(GRAPHSIZEX);i++)
+			{
+				GRAPH_DATA_YT_AddValue(_hGraphData,ADC_Get_Payload(g_16u_SamplesBuffer[i]));
+			}
+		}
 		/* END of critical section */
-		
-		GUI_MEMDEV_CopyToLCD(hMem1);
-		GUI_MEMDEV_CopyToLCD(hMem0);
-		
-    //GUI_Exec();                   /* Execute all GUI jobs ... Return 0 if nothing was done. */
-    //GUI_X_ExecIdle();             /* Nothing left to do for the moment ... Idle processing */
-		osThreadYield ();
+		osMutexRelease(mid_Acquisition);
+		GUI_Exec();
+		GUI_X_ExecIdle();
+  }
+}
+
+static void _cbCallback(WM_MESSAGE * pMsg) {
+  unsigned i;
+  WM_HWIN  hDlg;
+  WM_HWIN  hItem;
+
+  hDlg = pMsg->hWin;
+  switch (pMsg->MsgId) {
+			  case WM_INIT_DIALOG:
+						hItem = WM_GetDialogItem(hDlg, GUI_ID_GRAPH0);
+						_hGraphData = GRAPH_DATA_YT_Create(_GuiColors.Waveform, SCREENSIZEX, 0, 0);
+						GRAPH_AttachData(hItem,_hGraphData);
+						//GRAPH_SetVSizeX(hItem,RX_BUFFERSIZE);
+						GRAPH_SetBorder(hItem,1,1,1,1);
+						GRAPH_SetGridDistX(hItem, GRAPHUNITSIZE);
+						GRAPH_SetGridDistY(hItem, GRAPHUNITSIZE);
+						GRAPH_SetLineStyleH(hItem,GRIDLS);
+						GRAPH_SetLineStyleV(hItem,GRIDLS);
+						GRAPH_SetGridVis(hItem, 1);
+						GRAPH_SetGridFixedX(hItem, 1);
+						GRAPH_SetColor(hItem,_GuiColors.BackGround,GRAPH_CI_BK);
+						GRAPH_SetColor(hItem,_GuiColors.Border,GRAPH_CI_BORDER);
+						GRAPH_SetColor(hItem,_GuiColors.Frame,GRAPH_CI_FRAME);
+						GRAPH_SetColor(hItem,_GuiColors.Grid,GRAPH_CI_GRID);
+						//GRAPH_SetUserDraw(hItem, _UserDraw);
+						//
+						// Create and add vertical scale
+						//
+				/*
+						_hScaleV = GRAPH_SCALE_Create( 35, GUI_TA_RIGHT, GRAPH_SCALE_CF_VERTICAL, 25);
+						GRAPH_SCALE_SetTextColor(_hScaleV, GUI_YELLOW);
+						GRAPH_AttachScale(hItem, _hScaleV);
+				*/
+						//
+						// Create and add horizontal scale
+						//
+				/*
+						_hScaleH = GRAPH_SCALE_Create(155, GUI_TA_HCENTER, GRAPH_SCALE_CF_HORIZONTAL, 50);
+						GRAPH_SCALE_SetTextColor(_hScaleH, GUI_DARKGREEN);
+						GRAPH_AttachScale(hItem, _hScaleH);
+				*/
+				break;
+				case WM_TOUCH:
+						
+				break;
+				case WM_TIMER:
+						
+				break;
+  default:
+    WM_DefaultProc(pMsg);
   }
 }
 
@@ -203,30 +293,34 @@ static uint16_t Trigger(uint8_t Trig_SP, volatile unsigned short* Signal, uint16
 	return 0;
 }
 
-static void Draw_GraphGrid(uint16_t a_XSize, uint16_t a_YSize,uint16_t a_XStart,uint16_t a_YStart, uint16_t a_XDense, uint16_t a_YDense)
+static void Draw_GraphGrid(WM_HWIN hDlg_GRAPH, uint16_t a_XSize, uint16_t a_YSize, uint16_t a_XDense, uint16_t a_YDense)
 	{
 	//
 	// THIS CAN BE DONE FASTER.
 	//
-	uint16_t XStart,YStart;	
+	uint16_t xStart,yStart;	
 	uint16_t Xstep = a_XSize/a_XDense;
 	uint16_t Ystep = a_YSize/a_YDense;
 	uint16_t i=0;
 	unsigned char prevLineStyle, prevPenSize, prevGuiColor;
 	
+	xStart = WM_GetWindowOrgX(hDlg_GRAPH);
+	yStart = WM_GetWindowOrgY(hDlg_GRAPH);
 	prevLineStyle = GUI_SetLineStyle(GUI_LS_DOT);
 	prevPenSize = GUI_SetPenSize(1);
 	prevGuiColor = GUI_GetColor();
 	GUI_SetColor(GUI_BLACK);
 	
 	for(i=1;i<=Xstep;i++)
-		GUI_DrawLine(a_XStart+i*a_XDense,a_YStart,a_XStart + i*a_XDense,a_YStart+a_YSize);
+		GUI_DrawLine(xStart+i*a_XDense,yStart,xStart + i*a_XDense,yStart+a_YSize);
 	
 	for(i=1;i<=Ystep;i++)
-		GUI_DrawLine(a_XStart,a_YStart+i*a_YDense,a_XStart+a_XSize,a_YStart+i*a_YDense);
+		GUI_DrawLine(xStart,yStart+i*a_YDense,xStart+a_XSize,yStart+i*a_YDense);
 		
 	GUI_SetPenSize(4);
-	GUI_DrawRect(a_XStart,a_YStart,a_XStart+a_XSize-1,a_YStart+a_YSize-1);
+	GUI_DrawRect(xStart,yStart,xStart+a_XSize-1,yStart+a_YSize-1);
+	
+	GUI_Exec(); //	????????
 	
 	GUI_SetPenSize(prevPenSize);
 	GUI_SetColor(prevGuiColor);

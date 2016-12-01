@@ -26,6 +26,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+// Threads items
 osThreadId tid_Heart_Beat_Thread;
 osThreadDef (Heart_Beat_Thread, TH_HEARTBEATPRIORITY, 1, TH_HEARTBEATSTACK);
 

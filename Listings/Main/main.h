@@ -52,8 +52,8 @@ typedef enum LOGIC{
 
 /* Exported constants --------------------------------------------------------*/
 /* Defines */
-#define SPI_DMA							TRUE
-#define FAKE_WAVEFORM 			FALSE
+#define SPI_DMA							1
+#define FAKE_WAVEFORM 			0
 #define RX_BUFFERSIZE				1024
 #define RX_FAKEBUFFERSIZE		1024
 
@@ -101,7 +101,14 @@ typedef enum LOGIC{
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 #define UNUSED(x) ((void)(x))
+
 /* Exported functions ------------------------------------------------------- */
+/* Exported variables ------------------------------------------------------- */
+#if FAKE_WAVEFORM
+	extern uint8_t g_8u_SamplesBuffer[RX_FAKEBUFFERSIZE];
+#else
+	extern uint16_t g_16u_SamplesBuffer[RX_BUFFERSIZE];
+#endif
 
 #endif /* __MAIN_H */
 

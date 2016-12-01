@@ -222,9 +222,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>101</LineNumber>
+          <LineNumber>160</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134226358</Address>
+          <Address>134227578</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -233,55 +233,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>.\Listings\RTOS\GUI_Thread.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Scope_Final\Listings/RTOS/GUI_Thread.c\101</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>58</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134220254</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\Listings\RTOS\Acqusition_Thread.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Scope_Final\Listings/RTOS/Acqusition_Thread.c\58</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>61</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134220266</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\Listings\RTOS\Acqusition_Thread.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Scope_Final\Listings/RTOS/Acqusition_Thread.c\61</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>56</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134220242</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\Listings\RTOS\Acqusition_Thread.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Scope_Final\Listings/RTOS/Acqusition_Thread.c\56</Expression>
+          <Expression>\\Scope_Final\Listings/RTOS/GUI_Thread.c\160</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

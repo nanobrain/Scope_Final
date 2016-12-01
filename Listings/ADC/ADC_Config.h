@@ -24,11 +24,16 @@
 #define ADC_OPAMP_GPIO_CLK_ENABLE							__HAL_RCC_GPIOB_CLK_ENABLE
 	
 /* Functions ------------------------------------------------------- */
-static void ADC_CS_Write(LOGIC a_SetReset);
 HAL_StatusTypeDef ADC_Receive(void);
 HAL_StatusTypeDef ADC_Init(void);
 HAL_StatusTypeDef ADC_DeInit(void);
 uint8_t ADC_Is_Received(void);
+
+#if FAKE_WAVEFORM
+	uint8_t ADC_Get_Payload(uint8_t a_Data);
+#else
+	uint8_t ADC_Get_Payload(uint16_t a_Data);
+#endif
 
 #endif /* __ADC_CONFIG_H */
 
