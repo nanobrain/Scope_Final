@@ -24,13 +24,13 @@ int Init_Heart_Beat_Thread (void);
 void Heart_Beat_Thread (void const *argument);
 
 /* GUI thread */
-#define TH_GUIPRIORITY 						osPriorityHigh
+#define TH_GUIPRIORITY 						osPriorityAboveNormal
 #define TH_GUISTACK								2048
 int Init_GUIThread (void);
 void GUIThread (void const *argument);
 
 /* Acquisiion thread */
-#define TH_ACQUISITIONPRIORITY		osPriorityHigh
+#define TH_ACQUISITIONPRIORITY		osPriorityAboveNormal
 #define TH_ACQUISITIONSTACK				1024
 int Init_Acqusition_Thread (void);
 void Acqusition_Thread (void const *argument);

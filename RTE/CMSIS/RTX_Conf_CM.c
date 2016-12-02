@@ -193,7 +193,7 @@
 //   <i> when they are called from the interrupt handler.
 //   <i> Default: 16 entries
 #ifndef OS_FIFOSZ
- #define OS_FIFOSZ      48
+ #define OS_FIFOSZ      96
 #endif
  
 // </h>

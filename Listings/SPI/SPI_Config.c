@@ -53,7 +53,7 @@ HAL_StatusTypeDef Init_spi()
 	g_hSpi.Init.CLKPhase = SPI_PHASE_1EDGE;
 	g_hSpi.Init.NSS = SPI_NSS_HARD_OUTPUT;
 	g_hSpi.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-	g_hSpi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+	g_hSpi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
 	g_hSpi.Init.FirstBit = SPI_FIRSTBIT_MSB;
 	g_hSpi.Init.TIMode = SPI_TIMODE_DISABLE;
 	g_hSpi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

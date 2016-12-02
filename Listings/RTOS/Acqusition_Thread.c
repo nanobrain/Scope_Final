@@ -52,14 +52,13 @@ void Acqusition_Thread (void const *argument) {
 
 	osSignalWait(sid_GuiInitialized,osWaitForever);
   while (1) {
+		if (Buttons_GetState() == 0)
+			Relay(REL_GND,FALSE);
+		else
+				Relay(REL_GND,TRUE);
 		osMutexWait(mid_Acquisition,osWaitForever);
 		/* Critical section */
 		{
-			if (Buttons_GetState() == 0)
-				Relay(REL_GND,FALSE);
-			else
-				Relay(REL_GND,TRUE);
-				
 			#if FAKE_WAVEFORM == 0
 			
 			if( ADC_Receive() != HAL_OK )

@@ -50,7 +50,7 @@
 #define USERSPACEENDX			SCREENSIZEX
 #define USERSPACEENDY			SCREENSIZEY
 #define GRIDLS						GUI_LS_DOT
-#define GRAPHCOUNTX 			12
+#define GRAPHCOUNTX 			14
 #define GRAPHCOUNTY				8
 #define GRAPHUNITSIZE			34
 #define GRAPHSIZEX				GRAPHCOUNTX*GRAPHUNITSIZE
@@ -60,9 +60,12 @@
 #define GRAPHENDX					GRAPHSTARTX + GRAPHSIZEX
 #define GRAPHENDY					GRAPHSTARTY + GRAPHSIZEY
 
+#define GUI_ID_SCOPE_GRAPH	GUI_ID_USER + 1
+#define GUI_ID_AUTOTRIGGER	GUI_ID_USER + 2
+
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-
+static uint16_t _TriggerPoint=127;
 //
 // Graph data handle
 //
@@ -87,8 +90,9 @@ static GUI_Colors _GuiColors;
 // Dialog resource
 //
 static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
-  {	WINDOW_CreateIndirect,		"Background_Window",		0,							0,	0,	SCREENSIZEX,		SCREENSIZEY		},
-	{	GRAPH_CreateIndirect,			0,											GUI_ID_GRAPH0,	0,	0,	GRAPHSIZEX,		GRAPHSIZEY			},
+  {	WINDOW_CreateIndirect,		"Background_Window",		0,							0,		0,		SCREENSIZEX,	SCREENSIZEY		},
+	{	GRAPH_CreateIndirect,			0,											GUI_ID_SCOPE_GRAPH,	0,		0,		GRAPHSIZEX,		GRAPHSIZEY		},
+	{	BUTTON_CreateIndirect,		"Auto-Trigger",					GUI_ID_AUTOTRIGGER,			400,	250,	80,						22						}
 };
 
 // Threads items
@@ -96,13 +100,15 @@ osThreadId tid_GUIThread;
 osThreadDef (GUIThread, TH_GUIPRIORITY, 1, TH_GUISTACK);
 
 /* Private function prototypes -----------------------------------------------*/
-static uint16_t Trigger(uint8_t Trig_SP, volatile unsigned short* Signal, uint16_t Sig_Size );
+static uint16_t Trigger(uint8_t Trig_SP, volatile uint16_t* Signal, uint16_t Sig_Size );
 static void Draw_GraphGrid(WM_HWIN hDlg_GRAPH, uint16_t a_XSize, uint16_t a_YSize, uint16_t a_XDense, uint16_t a_YDense);
 static void _cbCallback(WM_MESSAGE * pMsg);
 static void Demo_Run(void);
 static void Display_HelloMsg(void);
 
 /* Private functions ---------------------------------------------------------*/
+void Auto_Trigger();
+
 int Init_GUIThread (void) {
 
   tid_GUIThread = osThreadCreate (osThread(GUIThread), NULL);
@@ -128,7 +134,7 @@ void GUIThread (void const *argument) {
 	Relays_Default();
 	
 	/* Define GUI colors */
-	_GuiColors.BackGround 			= GUI_LIGHTGRAY;
+	_GuiColors.BackGround 			= GUI_WHITE;
 	_GuiColors.Border 					= GUI_DARKBLUE;
 	_GuiColors.Frame 						= GUI_BLACK;
 	_GuiColors.GraphBackGround 	= GUI_BLACK;
@@ -137,7 +143,7 @@ void GUIThread (void const *argument) {
 	_GuiColors.Waveform					= GUI_GREEN;
 	
 	hDlg = GUI_CreateDialogBox(_aDialogCreate, GUI_COUNTOF(_aDialogCreate), _cbCallback, 0, 0, 0);	
-	hGraph = WM_GetDialogItem(hDlg, GUI_ID_GRAPH0);
+	hGraph = WM_GetDialogItem(hDlg, GUI_ID_SCOPE_GRAPH);
 	Refresh_TIM = WM_CreateTimer(hGraph, GUI_ID_USER, 20, 0);
 	WM_EnableMemdev(hGraph);
 	//WM_SetCreateFlags(WM_CF_MEMDEV);
@@ -154,7 +160,8 @@ void GUIThread (void const *argument) {
 		{
 			GRAPH_DATA_YT_Clear(_hGraphData);
 			
-			for(i=0;i<(GRAPHSIZEX);i++)
+			i = 0;//Trigger(50,g_16u_SamplesBuffer,RX_BUFFERSIZE);
+			for(;i<(GRAPHSIZEX);i++)
 			{
 				GRAPH_DATA_YT_AddValue(_hGraphData,ADC_Get_Payload(g_16u_SamplesBuffer[i]));
 			}
@@ -174,7 +181,7 @@ static void _cbCallback(WM_MESSAGE * pMsg) {
   hDlg = pMsg->hWin;
   switch (pMsg->MsgId) {
 			  case WM_INIT_DIALOG:
-						hItem = WM_GetDialogItem(hDlg, GUI_ID_GRAPH0);
+						hItem = WM_GetDialogItem(hDlg, GUI_ID_SCOPE_GRAPH);
 						_hGraphData = GRAPH_DATA_YT_Create(_GuiColors.Waveform, SCREENSIZEX, 0, 0);
 						GRAPH_AttachData(hItem,_hGraphData);
 						//GRAPH_SetVSizeX(hItem,RX_BUFFERSIZE);
@@ -213,11 +220,58 @@ static void _cbCallback(WM_MESSAGE * pMsg) {
 				case WM_TIMER:
 						
 				break;
+				case WM_NOTIFY_PARENT:
+					if (pMsg->Data.v == WM_NOTIFICATION_RELEASED)
+					{
+						int Id = WM_GetId(pMsg->hWinSrc);
+						switch(Id)
+						{
+							case GUI_ID_AUTOTRIGGER:
+								Auto_Trigger();
+							break;
+						}
+					}
   default:
     WM_DefaultProc(pMsg);
   }
 }
 
+void minmax (uint16_t* a, uint16_t i, uint16_t j, uint16_t* min, uint16_t* max)
+	{
+  uint16_t lmin, lmax, rmin, rmax, mid;
+  if (i == j) {
+    *min = a[i];
+    *max = a[j];
+  } else if (j == i + 1) {
+    if (a[i] > a[j]) {
+      *min = a[j];
+      *max = a[i];
+    } else {
+      *min = a[i];
+      *max = a[j];
+    }
+  } else {
+    mid = (i + j) / 2;
+    minmax(a, i, mid, &lmin, &lmax);
+    minmax(a, mid + 1, j, &rmin, &rmax);
+    *min = (lmin > rmin) ? rmin : lmin;
+    *max = (lmax > rmax) ? lmax : rmax;
+  }
+}
+
+void Auto_Trigger()
+{
+	uint16_t min,max;
+	osMutexWait(mid_Acquisition,osWaitForever);
+	/* Critical section */
+		{
+			minmax(g_16u_SamplesBuffer,0,RX_BUFFERSIZE,&min,&max);
+			_TriggerPoint = max - min;
+		}
+	/* END of critical section */
+	osMutexRelease(mid_Acquisition);
+}
+	
 static void Display_HelloMsg(void)
 {
 	GUI_SetColor(GUI_BLUE);
@@ -256,17 +310,17 @@ static void Demo_Run(void)
 	Leds_All_Off();
 }
 
-static uint16_t Trigger(uint8_t Trig_SP, volatile unsigned short* Signal, uint16_t Sig_Size )
+static uint16_t Trigger(uint8_t Trig_SP, volatile uint16_t* Signal, uint16_t Sig_Size )
 	{
 
 	uint16_t i=0;
 	uint16_t ctr=0;
-	uint8_t Treshold = 3;
+	uint8_t offset = 100;
 	Sig_Size -=500;
 	
-	for(i=0;i<=Sig_Size;i++) // Find first raising edge
+	for(i=0;i<=Sig_Size;i++) // Find first raising edge. Start from offset
 	{
-		if((Signal[i] >= Trig_SP) && i==Treshold)
+		if((Signal[i] >= Trig_SP) && i==offset)
 		{
 			ctr=i;
 			break;
