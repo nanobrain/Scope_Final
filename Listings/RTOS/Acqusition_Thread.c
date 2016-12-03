@@ -61,19 +61,14 @@ void Acqusition_Thread (void const *argument) {
 		osMutexWait(mid_Acquisition,osWaitForever);
 		/* Critical section */
 		{
-
 			if( ADC_Receive() != HAL_OK )
 				Error_Handler(ERROR_CONVERSION);
 			
 			while(ADC_Is_Busy())
-			{
 				osDelay(1);
-			}
-
 		}
 		/* END of critical section */
-		osMutexRelease(mid_Acquisition); 	// ATT: Mutex can be released here ONLY if ADC_Receive is blocking!
-																			// Mutex cannot be released until acquisition finish!
+		osMutexRelease(mid_Acquisition);
     osThreadYield ();                                         // suspend thread
 		
   }

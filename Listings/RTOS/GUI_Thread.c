@@ -113,7 +113,7 @@ int Init_GUIThread (void) {
 void GUIThread (void const *argument) {
 	WM_HWIN hDlg;
 	WM_HWIN hGraph;
-	uint16_t i;
+	uint16_t i,triggerVal;
 	GUI_MEMDEV_Handle hMem0,hMem1;
 	GUI_RECT Client_Rect;
 
@@ -152,8 +152,8 @@ void GUIThread (void const *argument) {
 		{
 			GRAPH_DATA_YT_Clear(_hGraphData);
 			
-			i = Trigger(50,g_d8_SamplesBuffer,BUFFERSIZE(g_d8_SamplesBuffer));
-			for(;i<(GRAPHSIZEX);i++)
+			triggerVal = Trigger(200,g_d8_SamplesBuffer,BUFFERSIZE(g_d8_SamplesBuffer));
+			for(i=triggerVal;i<GRAPHSIZEX+triggerVal;i++)
 			{
 				GRAPH_DATA_YT_AddValue(_hGraphData,(uint8_t)(g_d8_SamplesBuffer[i].payload));
 			}
@@ -176,7 +176,8 @@ static void _cbCallback(WM_MESSAGE * pMsg) {
 						hItem = WM_GetDialogItem(hDlg, GUI_ID_SCOPE_GRAPH);
 						_hGraphData = GRAPH_DATA_YT_Create(_GuiColors.Waveform, SCREENSIZEX, 0, 0);
 						GRAPH_AttachData(hItem,_hGraphData);
-						GRAPH_SetVSizeX(hItem,RX_BUFFERCOUNT-50);
+						GRAPH_DATA_YT_SetAlign(_hGraphData,GRAPH_ALIGN_LEFT);
+						//GRAPH_SetVSizeX(hItem,RX_BUFFERCOUNT-50);
 						GRAPH_SetBorder(hItem,1,1,1,1);
 						GRAPH_SetGridDistX(hItem, GRAPHUNITSIZE);
 						GRAPH_SetGridDistY(hItem, GRAPHUNITSIZE);
