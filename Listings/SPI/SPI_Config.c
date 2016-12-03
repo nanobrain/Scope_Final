@@ -27,7 +27,7 @@
 #include <stdlib.h>
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef g_hSpi;
-DMA_HandleTypeDef g_hTxDma, g_hRxDma;
+DMA_HandleTypeDef g_hSpiTxDma, g_hSpiRxDma;
 uint8_t g_aTxBuffer[20]="DUMMY";
 
 /* Private function prototypes -----------------------------------------------*/
@@ -98,7 +98,7 @@ void HAL_SPI_MspInit_IT(SPI_HandleTypeDef *hspi)
 		/* Enable SPI2 clock */
 		SPIx_CLK_ENABLE();
 		/* Enable DMA clock */
-		DMAx_CLK_ENABLE();
+		SPIx_DMAx_CLK_ENABLE();
 
 		/*##-2- Configure peripheral GPIO ##########################################*/  
 		/* SPI SCK GPIO pin configuration  */
@@ -147,8 +147,7 @@ void HAL_SPI_MspInit_DMA(SPI_HandleTypeDef *hspi)
 		/* Enable SPI2 clock */
 		SPIx_CLK_ENABLE();
 		/* Enable DMA clock */
-		DMAx_CLK_ENABLE();
-
+		SPIx_DMAx_CLK_ENABLE();
 		
 		/*##-2- Configure peripheral GPIO ##########################################*/  
 		/* SPI SCK GPIO pin configuration  */
@@ -173,44 +172,46 @@ void HAL_SPI_MspInit_DMA(SPI_HandleTypeDef *hspi)
 		
 		/*##-3- Configure the DMA ##################################################*/
 		/* Configure the DMA handler for Transmission process */
-		g_hTxDma.Instance = SPIx_TX_DMA_STREAM;
-		g_hTxDma.Init.Channel = SPIx_TX_DMA_CHANNEL;
-		g_hTxDma.Init.Direction = DMA_MEMORY_TO_PERIPH;
-		g_hTxDma.Init.PeriphInc = DMA_PINC_DISABLE;
-		g_hTxDma.Init.MemInc = DMA_MINC_ENABLE;
-		g_hTxDma.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-		g_hTxDma.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-		g_hTxDma.Init.Mode = DMA_NORMAL;
-		g_hTxDma.Init.Priority = DMA_PRIORITY_LOW;
-		g_hTxDma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-		g_hTxDma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-		g_hTxDma.Init.MemBurst = DMA_MBURST_SINGLE;
-		g_hTxDma.Init.PeriphBurst = DMA_MBURST_SINGLE;
+		g_hSpiTxDma.Instance = SPIx_TX_DMA_STREAM;
+		g_hSpiTxDma.Init.Channel = SPIx_TX_DMA_CHANNEL;
+		g_hSpiTxDma.Init.Direction = DMA_MEMORY_TO_PERIPH;
+		g_hSpiTxDma.Init.PeriphInc = DMA_PINC_DISABLE;
+		g_hSpiTxDma.Init.MemInc = DMA_MINC_ENABLE;
+		g_hSpiTxDma.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+		g_hSpiTxDma.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+		g_hSpiTxDma.Init.Mode = DMA_NORMAL;
+		g_hSpiTxDma.Init.Priority = DMA_PRIORITY_LOW;
+		g_hSpiTxDma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+		g_hSpiTxDma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+		g_hSpiTxDma.Init.MemBurst = DMA_MBURST_SINGLE;
+		g_hSpiTxDma.Init.PeriphBurst = DMA_MBURST_SINGLE;
 		
-		HAL_DMA_Init(&g_hTxDma);
+		// Initialize DMA
+		HAL_DMA_Init(&g_hSpiTxDma);
 		
 		/* Associate the initialized DMA handle to the the SPI handle */
-		__HAL_LINKDMA(hspi,hdmatx,g_hTxDma);
+		__HAL_LINKDMA(hspi,hdmatx,g_hSpiTxDma);
 		
 		// Prepare DMA for Rx struct
-		g_hRxDma.Instance = SPIx_RX_DMA_STREAM;
-		g_hRxDma.Init.Channel = SPIx_RX_DMA_CHANNEL;
-		g_hRxDma.Init.Direction = DMA_PERIPH_TO_MEMORY;
-		g_hRxDma.Init.PeriphInc = DMA_PINC_DISABLE;
-		g_hRxDma.Init.MemInc = DMA_MINC_ENABLE;
-		g_hRxDma.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-		g_hRxDma.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-		g_hRxDma.Init.Mode = DMA_NORMAL;
-		g_hRxDma.Init.Priority = DMA_PRIORITY_HIGH;
-		g_hRxDma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-		g_hRxDma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-		g_hRxDma.Init.MemBurst = DMA_MBURST_SINGLE;
-		g_hRxDma.Init.PeriphBurst = DMA_PBURST_SINGLE;
+		g_hSpiRxDma.Instance = SPIx_RX_DMA_STREAM;
+		g_hSpiRxDma.Init.Channel = SPIx_RX_DMA_CHANNEL;
+		g_hSpiRxDma.Init.Direction = DMA_PERIPH_TO_MEMORY;
+		g_hSpiRxDma.Init.PeriphInc = DMA_PINC_DISABLE;
+		g_hSpiRxDma.Init.MemInc = DMA_MINC_ENABLE;
+		g_hSpiRxDma.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+		g_hSpiRxDma.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+		g_hSpiRxDma.Init.Mode = DMA_NORMAL;
+		g_hSpiRxDma.Init.Priority = DMA_PRIORITY_HIGH;
+		g_hSpiRxDma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+		g_hSpiRxDma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+		g_hSpiRxDma.Init.MemBurst = DMA_MBURST_SINGLE;
+		g_hSpiRxDma.Init.PeriphBurst = DMA_PBURST_SINGLE;
 		
-		HAL_DMA_Init(&g_hRxDma);
+		// Initialize DMA
+		HAL_DMA_Init(&g_hSpiRxDma);
 		
 		/* Associate the initialized DMA handle to the the SPI handle */
-		__HAL_LINKDMA(hspi,hdmarx,g_hRxDma);
+		__HAL_LINKDMA(hspi,hdmarx,g_hSpiRxDma);
 		
 		/*##-4- Configure the NVIC for DMA #########################################*/ 
 		/* NVIC configuration for DMA transfer complete interrupt (SPI2_TX) */
@@ -267,9 +268,9 @@ void HAL_SPI_MspDeInit_DMA(SPI_HandleTypeDef *hspi)
 
     /*##-3- Disable the DMA ####################################################*/
     /* De-Initialize the DMA associated to transmission process */
-    HAL_DMA_DeInit(&g_hTxDma);
+    HAL_DMA_DeInit(&g_hSpiTxDma);
     /* De-Initialize the DMA associated to reception process */
-    HAL_DMA_DeInit(&g_hRxDma);
+    HAL_DMA_DeInit(&g_hSpiRxDma);
 
     /*##-4- Disable the NVIC for DMA ###########################################*/
     HAL_NVIC_DisableIRQ(SPIx_DMA_TX_IRQn);

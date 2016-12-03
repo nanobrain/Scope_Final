@@ -152,10 +152,10 @@ void GUIThread (void const *argument) {
 		{
 			GRAPH_DATA_YT_Clear(_hGraphData);
 			
-			triggerVal = Trigger(200,g_d8_SamplesBuffer,RX_BUFFERCOUNT);
+			triggerVal = Trigger(200,g_d8_RxBufferMain1,RX_BUFFERCOUNT);
 			for(i=triggerVal;i<GRAPHSIZEX+triggerVal;i++)
 			{
-				GRAPH_DATA_YT_AddValue(_hGraphData,(uint8_t)(g_d8_SamplesBuffer[i].payload));
+				GRAPH_DATA_YT_AddValue(_hGraphData,(short)g_d8_RxBufferMain1[i].payload);
 			}
 		}
 		/* END of critical section */

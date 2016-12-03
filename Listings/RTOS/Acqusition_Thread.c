@@ -53,7 +53,7 @@ void Acqusition_Thread (void const *argument) {
 	osSignalWait(sid_GuiInitialized,osWaitForever);
   while (1) {
 
-		if (Buttons_GetState() == 0)
+		if (Buttons_GetState() == 0) // TEMPORARY
 			Relay(REL_GND,TRUE);
 		else
 			Relay(REL_GND,FALSE);
@@ -61,10 +61,10 @@ void Acqusition_Thread (void const *argument) {
 		osMutexWait(mid_Acquisition,osWaitForever);
 		/* Critical section */
 		{
-			if( ADC_Receive() != HAL_OK )
-				Error_Handler(ERROR_CONVERSION);
-			
-			while(ADC_Is_Busy())
+		if( ADC_Receive() != HAL_OK )
+			Error_Handler(ERROR_CONVERSION);
+		
+		while(ADC_Is_Busy())
 				osDelay(1);
 		}
 		/* END of critical section */

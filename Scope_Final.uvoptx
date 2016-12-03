@@ -190,7 +190,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>ARMRTXEVENTFLAGS</Key>
-          <Name>-L70 -Z18 -C0 -M0 -T1</Name>
+          <Name>-L70 -Z22 -C0 -M0 -T1</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -223,12 +223,12 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>values</ItemText>
+          <ItemText>g_d8_RxBufferMain</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>g_16u_SamplesBuffer,0x10</ItemText>
+          <ItemText>g_u8_RxBufferCopy</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>

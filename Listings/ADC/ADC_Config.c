@@ -17,6 +17,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "ADC_Config.h"
+#include "Data_Processing.h"
 #include <stdlib.h>
 #include <cstdio>
 
@@ -26,14 +27,23 @@
 /* Private variables ---------------------------------------------------------*/
 extern SPI_HandleTypeDef g_hSpi;
 
-Data8 g_d8_SamplesBuffer[RX_BUFFERCOUNT]__attribute__((at(AQQ_MAIN_BUFFER_ADDRESS)));																// Main acquisition buffer
+// Pointer to buffer which is currently used for acquisition
+//Data8* g_d8_pBuffer;
+// Main acquisition buffers
+Data8 g_d8_RxBufferMain1			[RX_BUFFERCOUNT]
+														__attribute__((at(AQQ_MAIN_BUFFER_ADDRESS)))
+														/*__attribute__((aligned(16)))*/;
+
+/*Data8 g_d8_RxBufferMain2		[RX_BUFFERCOUNT]
+														__attribute__((at(AQQ_COPY_BUFFER_ADDRESS)))*/
+														/*__attribute__((aligned(16)))*/;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
 HAL_StatusTypeDef ADC_Init(void)
 {
-	//g_d8_SamplesBuffer = (Data8*)malloc(BUFFERSIZE(g_d8_SamplesBuffer));
+	//g_d8_RxBufferMain = (Data8*)malloc(BUFFERSIZE(g_d8_RxBufferMain));
 	// TODO: Check returned address!!
 	return HAL_OK;
 }
@@ -54,9 +64,9 @@ HAL_StatusTypeDef ADC_Receive(void)
 	if( HAL_SPI_GetState(&g_hSpi) != HAL_SPI_STATE_RESET )// If SPI initialized
 	{
 		if( SPI_DMA )
-			errCode = HAL_SPI_Receive_DMA(&g_hSpi,(uint8_t*)g_d8_SamplesBuffer,BUFFERSIZE(g_d8_SamplesBuffer));
+			errCode = HAL_SPI_Receive_DMA(&g_hSpi,(uint8_t*)g_d8_RxBufferMain1,BUFFERSIZE(g_d8_RxBufferMain1));
 		else
-			errCode = HAL_SPI_Receive_IT(&g_hSpi,(uint8_t*)g_d8_SamplesBuffer,BUFFERSIZE(g_d8_SamplesBuffer));
+			errCode = HAL_SPI_Receive_IT(&g_hSpi,(uint8_t*)g_d8_RxBufferMain1,BUFFERSIZE(g_d8_RxBufferMain1));
 	}
 	else
 	{
@@ -73,7 +83,7 @@ HAL_StatusTypeDef ADC_Receive(void)
 	for(i=0;i<RX_BUFFERCOUNT-offset;i++)
 	{
 		k=(k+1)%127;
-		g_d8_SamplesBuffer[i+offset].payload = k;
+		g_d8_RxBufferMain1[i+offset].payload = k;
 	}
 	#endif
 	
