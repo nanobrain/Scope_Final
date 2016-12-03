@@ -26,7 +26,7 @@
 /* Private variables ---------------------------------------------------------*/
 extern SPI_HandleTypeDef g_hSpi;
 
-Data8 g_d8_SamplesBuffer[RX_BUFFERCOUNT]__attribute__((at(0xC0400020))); // Main acquisition buffer
+Data8 g_d8_SamplesBuffer[RX_BUFFERCOUNT]__attribute__((at(AQQ_MAIN_BUFFER_ADDRESS)));																// Main acquisition buffer
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -70,7 +70,7 @@ HAL_StatusTypeDef ADC_Receive(void)
 		offset=(offset+1)%127;
 	
 	k=0;
-	for(i=0;i<BUFFERSIZE(g_d8_SamplesBuffer)-offset;i++)
+	for(i=0;i<RX_BUFFERCOUNT-offset;i++)
 	{
 		k=(k+1)%127;
 		g_d8_SamplesBuffer[i+offset].payload = k;

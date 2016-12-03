@@ -51,11 +51,21 @@ typedef enum LOGIC{
 	TRUE=1
 }LOGIC;
 
+/* Exported macro ------------------------------------------------------------*/
+#define COUNTOF(__BUFFER__)   						(sizeof(__BUFFER__) * sizeof(*(__BUFFER__)))
+#define UNUSED(x) 												((void)(x))
+#define BUFFERSIZE(x)											(COUNTOF(x) - 1)
+
 /* Exported constants --------------------------------------------------------*/
 /* Defines */
-#define SPI_DMA							0 // 1 -> Use DMA. 0 -> Use IT
-#define FAKE_WAVEFORM 			0	// 1 -> Use fake waveform. 0 -> Use real waveform from ADC
-#define RX_BUFFERCOUNT			900
+#define SPI_DMA														0 // 1 -> Use DMA. 0 -> Use IT
+#define FAKE_WAVEFORM 										0	// 1 -> Use fake waveform. 0 -> Use real waveform from ADC
+#define RX_BUFFERCOUNT										900
+#define SDRAM_ADDRESS											0xC0200000
+#define GUI_BUFFER_ADDRESS 								0xC0200000
+#define GUI_NUMBYTES  										0x200000
+#define AQQ_MAIN_BUFFER_ADDRESS						SDRAM_ADDRESS+GUI_NUMBYTES
+#define AQQ_COPY_BUFFER_ADDRESS						AQQ_MAIN_BUFFER_ADDRESS+RX_BUFFERCOUNT*sizeof(Data8)
 
 /* Definition for SPIx RCC resources */
 #define SPIx															SPI2
@@ -94,13 +104,6 @@ typedef enum LOGIC{
 
 #define SPIx_DMA_TX_IRQHandler						DMA1_Stream4_IRQHandler
 #define SPIx_DMA_RX_IRQHandler						DMA1_Stream3_IRQHandler
-
-/* Size of buffer */
-#define BUFFERSIZE(x)											(COUNTOF(x) - 1)
-
-/* Exported macro ------------------------------------------------------------*/
-#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) * sizeof(*(__BUFFER__)))
-#define UNUSED(x) ((void)(x))
 
 /* Exported functions ------------------------------------------------------- */
 /* Exported variables ------------------------------------------------------- */

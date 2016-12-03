@@ -43,18 +43,7 @@ Purpose     : Display controller initialization
 */
 
 #include "GUI.h"
-
-/*********************************************************************
-*
-*       Defines
-*
-**********************************************************************
-*/
-//
-// Define the available number of bytes available for the GUI
-//
-#define GUI_NUMBYTES  			0x200000
-#define GUI_BUFFER_ADDRESS 	0xC0200000
+#include "Main.h"
 
 /*********************************************************************
 *
