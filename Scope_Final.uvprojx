@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>OS_STKCHECK</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Listings;.\Listings\ADC;.\Listings\RTOS;.\Listings\DAC;.\Listings\SPI;.\Listings\Leds;.\Listings\Relays;.\Listings\Utils;.\Listings\Main</IncludePath>
+              <IncludePath>.\Listings;.\Listings\ADC;.\Listings\RTOS;.\Listings\DAC;.\Listings\SPI;.\Listings\Leds;.\Listings\Relays;.\Listings\Utils;.\Listings\Main;.\Listings\Data_Processing</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -533,6 +533,21 @@
               <FileName>ReadMe.txt</FileName>
               <FileType>5</FileType>
               <FilePath>.\ReadMe.txt</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Data_Processing</GroupName>
+          <Files>
+            <File>
+              <FileName>Data_Processing.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Listings\Data_Processing\Data_Processing.c</FilePath>
+            </File>
+            <File>
+              <FileName>Data_Processing.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Listings\Data_Processing\Data_Processing.h</FilePath>
             </File>
           </Files>
         </Group>

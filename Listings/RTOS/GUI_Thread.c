@@ -25,6 +25,7 @@
 #include "FRAMEWIN.h"
 #include "DIALOG.h"
 #include "main.h"
+#include "Error_Handler.h"
 #include "ADC_Config.h"
 #include "Relays.h"
 #include "Leds.h"
@@ -70,7 +71,6 @@ static uint16_t _TriggerPoint=127;
 // Graph data handle
 //
 static GRAPH_DATA_Handle _hGraphData;
-
 //
 // Colors to be used in graph window
 //
@@ -83,16 +83,14 @@ typedef struct GUI_Colors{
 	GUI_COLOR Frame;
 	GUI_COLOR Waveform;
 }GUI_Colors;
-
 static GUI_Colors _GuiColors;
-
 //
 // Dialog resource
 //
 static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
-  {	WINDOW_CreateIndirect,		"Background_Window",		0,							0,		0,		SCREENSIZEX,	SCREENSIZEY		},
+  {	WINDOW_CreateIndirect,		"Background_Window",		0,									0,		0,		SCREENSIZEX,	SCREENSIZEY		},
 	{	GRAPH_CreateIndirect,			0,											GUI_ID_SCOPE_GRAPH,	0,		0,		GRAPHSIZEX,		GRAPHSIZEY		},
-	{	BUTTON_CreateIndirect,		"Auto-Trigger",					GUI_ID_AUTOTRIGGER,			400,	250,	80,						22						}
+	{	BUTTON_CreateIndirect,		"Auto-Trigger",					GUI_ID_AUTOTRIGGER,	400,	250,	80,						22						}
 };
 
 // Threads items
@@ -100,14 +98,9 @@ osThreadId tid_GUIThread;
 osThreadDef (GUIThread, TH_GUIPRIORITY, 1, TH_GUISTACK);
 
 /* Private function prototypes -----------------------------------------------*/
-static uint16_t Trigger(uint8_t Trig_SP, volatile uint16_t* Signal, uint16_t Sig_Size );
-static void Draw_GraphGrid(WM_HWIN hDlg_GRAPH, uint16_t a_XSize, uint16_t a_YSize, uint16_t a_XDense, uint16_t a_YDense);
 static void _cbCallback(WM_MESSAGE * pMsg);
 static void Demo_Run(void);
 static void Display_HelloMsg(void);
-
-/* Private functions ---------------------------------------------------------*/
-void Auto_Trigger();
 
 int Init_GUIThread (void) {
 
@@ -120,7 +113,6 @@ int Init_GUIThread (void) {
 void GUIThread (void const *argument) {
 	WM_HWIN hDlg;
 	WM_HWIN hGraph;
-	WM_HTIMER Refresh_TIM;
 	uint16_t i;
 	GUI_MEMDEV_Handle hMem0,hMem1;
 	GUI_RECT Client_Rect;
@@ -142,11 +134,10 @@ void GUIThread (void const *argument) {
 	_GuiColors.Label 						= GUI_WHITE;
 	_GuiColors.Waveform					= GUI_GREEN;
 	
-	hDlg = GUI_CreateDialogBox(_aDialogCreate, GUI_COUNTOF(_aDialogCreate), _cbCallback, 0, 0, 0);	
+	WM_SetCreateFlags(WM_CF_MEMDEV);
+	hDlg = GUI_CreateDialogBox(_aDialogCreate, GUI_COUNTOF(_aDialogCreate), _cbCallback, 0, 0, 0);
 	hGraph = WM_GetDialogItem(hDlg, GUI_ID_SCOPE_GRAPH);
-	Refresh_TIM = WM_CreateTimer(hGraph, GUI_ID_USER, 20, 0);
-	WM_EnableMemdev(hGraph);
-	//WM_SetCreateFlags(WM_CF_MEMDEV);
+	//WM_EnableMemdev(hGraph);
 	WM_GetClientRectEx(hDlg,&Client_Rect);
 	
 	/* Indicate full initialization finish */
@@ -154,16 +145,17 @@ void GUIThread (void const *argument) {
 	
 	GUI_Clear();
 	GUI_CURSOR_Show();
+	
   while (1) {
 		osMutexWait(mid_Acquisition,osWaitForever);
 		/* Critical section */
 		{
 			GRAPH_DATA_YT_Clear(_hGraphData);
 			
-			i = 0;//Trigger(50,g_16u_SamplesBuffer,RX_BUFFERSIZE);
+			i = Trigger(50,g_d8_SamplesBuffer,BUFFERSIZE(g_d8_SamplesBuffer));
 			for(;i<(GRAPHSIZEX);i++)
 			{
-				GRAPH_DATA_YT_AddValue(_hGraphData,ADC_Get_Payload(g_16u_SamplesBuffer[i]));
+				GRAPH_DATA_YT_AddValue(_hGraphData,(uint8_t)(g_d8_SamplesBuffer[i].payload));
 			}
 		}
 		/* END of critical section */
@@ -184,7 +176,7 @@ static void _cbCallback(WM_MESSAGE * pMsg) {
 						hItem = WM_GetDialogItem(hDlg, GUI_ID_SCOPE_GRAPH);
 						_hGraphData = GRAPH_DATA_YT_Create(_GuiColors.Waveform, SCREENSIZEX, 0, 0);
 						GRAPH_AttachData(hItem,_hGraphData);
-						//GRAPH_SetVSizeX(hItem,RX_BUFFERSIZE);
+						GRAPH_SetVSizeX(hItem,RX_BUFFERCOUNT-50);
 						GRAPH_SetBorder(hItem,1,1,1,1);
 						GRAPH_SetGridDistX(hItem, GRAPHUNITSIZE);
 						GRAPH_SetGridDistY(hItem, GRAPHUNITSIZE);
@@ -235,42 +227,6 @@ static void _cbCallback(WM_MESSAGE * pMsg) {
     WM_DefaultProc(pMsg);
   }
 }
-
-void minmax (uint16_t* a, uint16_t i, uint16_t j, uint16_t* min, uint16_t* max)
-	{
-  uint16_t lmin, lmax, rmin, rmax, mid;
-  if (i == j) {
-    *min = a[i];
-    *max = a[j];
-  } else if (j == i + 1) {
-    if (a[i] > a[j]) {
-      *min = a[j];
-      *max = a[i];
-    } else {
-      *min = a[i];
-      *max = a[j];
-    }
-  } else {
-    mid = (i + j) / 2;
-    minmax(a, i, mid, &lmin, &lmax);
-    minmax(a, mid + 1, j, &rmin, &rmax);
-    *min = (lmin > rmin) ? rmin : lmin;
-    *max = (lmax > rmax) ? lmax : rmax;
-  }
-}
-
-void Auto_Trigger()
-{
-	uint16_t min,max;
-	osMutexWait(mid_Acquisition,osWaitForever);
-	/* Critical section */
-		{
-			minmax(g_16u_SamplesBuffer,0,RX_BUFFERSIZE,&min,&max);
-			_TriggerPoint = max - min;
-		}
-	/* END of critical section */
-	osMutexRelease(mid_Acquisition);
-}
 	
 static void Display_HelloMsg(void)
 {
@@ -308,76 +264,4 @@ static void Demo_Run(void)
 	HAL_Delay(100);
 	Relay(REL_ACDC,FALSE);
 	Leds_All_Off();
-}
-
-static uint16_t Trigger(uint8_t Trig_SP, volatile uint16_t* Signal, uint16_t Sig_Size )
-	{
-
-	uint16_t i=0;
-	uint16_t ctr=0;
-	uint8_t offset = 100;
-	Sig_Size -=500;
-	
-	for(i=0;i<=Sig_Size;i++) // Find first raising edge. Start from offset
-	{
-		if((Signal[i] >= Trig_SP) && i==offset)
-		{
-			ctr=i;
-			break;
-		}
-	}
-	
-	for(i=ctr;i<=Sig_Size;i++) // Find falling edge
-	{
-		if(Signal[i] < Trig_SP)
-		{
-			ctr=i;
-			break;
-		}
-	}
-	
-	for(i=ctr;i<=Sig_Size;i++) // Find second raising edge
-	{
-		if(Signal[i] >= Trig_SP)
-		{
-			return i;
-		}
-	}
-	
-	return 0;
-}
-
-static void Draw_GraphGrid(WM_HWIN hDlg_GRAPH, uint16_t a_XSize, uint16_t a_YSize, uint16_t a_XDense, uint16_t a_YDense)
-	{
-	//
-	// THIS CAN BE DONE FASTER.
-	//
-	uint16_t xStart,yStart;	
-	uint16_t Xstep = a_XSize/a_XDense;
-	uint16_t Ystep = a_YSize/a_YDense;
-	uint16_t i=0;
-	unsigned char prevLineStyle, prevPenSize, prevGuiColor;
-	
-	xStart = WM_GetWindowOrgX(hDlg_GRAPH);
-	yStart = WM_GetWindowOrgY(hDlg_GRAPH);
-	prevLineStyle = GUI_SetLineStyle(GUI_LS_DOT);
-	prevPenSize = GUI_SetPenSize(1);
-	prevGuiColor = GUI_GetColor();
-	GUI_SetColor(GUI_BLACK);
-	
-	for(i=1;i<=Xstep;i++)
-		GUI_DrawLine(xStart+i*a_XDense,yStart,xStart + i*a_XDense,yStart+a_YSize);
-	
-	for(i=1;i<=Ystep;i++)
-		GUI_DrawLine(xStart,yStart+i*a_YDense,xStart+a_XSize,yStart+i*a_YDense);
-		
-	GUI_SetPenSize(4);
-	GUI_DrawRect(xStart,yStart,xStart+a_XSize-1,yStart+a_YSize-1);
-	
-	GUI_Exec(); //	????????
-	
-	GUI_SetPenSize(prevPenSize);
-	GUI_SetColor(prevGuiColor);
-	GUI_SetLineStyle(prevLineStyle);
-
 }

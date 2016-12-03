@@ -54,8 +54,6 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-extern uint8_t g_aRxBuffer[10];
-extern uint8_t g_aTxBuffer[10];
 /* SPI handler declared in "main.c" file */
 extern SPI_HandleTypeDef g_hSpi;
 /* Private function prototypes -----------------------------------------------*/

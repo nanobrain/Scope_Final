@@ -139,7 +139,6 @@ int main(void)
 	if( Init_GUIThread() != 0 ) 					// Init and run thread 3
 		Error_Handler(ERROR_GUI_INIT);
 
-	
   osKernelStart();                      // start thread execution 
 #endif
 	

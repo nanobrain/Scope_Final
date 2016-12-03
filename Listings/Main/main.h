@@ -42,6 +42,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <cstring>
 #include "stm32f7xx_hal.h"
+#include "Data_Processing.h"
 #include "Board_Buttons.h"              // ::Board Support:Buttons
 
 /* Exported types ------------------------------------------------------------*/
@@ -52,10 +53,9 @@ typedef enum LOGIC{
 
 /* Exported constants --------------------------------------------------------*/
 /* Defines */
-#define SPI_DMA							1
-#define FAKE_WAVEFORM 			0
-#define RX_BUFFERSIZE				1024
-#define RX_FAKEBUFFERSIZE		1024
+#define SPI_DMA							0 // 1 -> Use DMA. 0 -> Use IT
+#define FAKE_WAVEFORM 			0	// 1 -> Use fake waveform. 0 -> Use real waveform from ADC
+#define RX_BUFFERCOUNT			900
 
 /* Definition for SPIx RCC resources */
 #define SPIx															SPI2
@@ -99,16 +99,12 @@ typedef enum LOGIC{
 #define BUFFERSIZE(x)											(COUNTOF(x) - 1)
 
 /* Exported macro ------------------------------------------------------------*/
-#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) * sizeof(*(__BUFFER__)))
 #define UNUSED(x) ((void)(x))
 
 /* Exported functions ------------------------------------------------------- */
 /* Exported variables ------------------------------------------------------- */
-#if FAKE_WAVEFORM
-	extern uint8_t g_8u_SamplesBuffer[RX_FAKEBUFFERSIZE];
-#else
-	extern uint16_t g_16u_SamplesBuffer[RX_BUFFERSIZE];
-#endif
+extern Data8 g_d8_SamplesBuffer[RX_BUFFERCOUNT];
 
 #endif /* __MAIN_H */
 

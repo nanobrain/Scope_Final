@@ -37,7 +37,7 @@ typedef enum RELAY{
 HAL_StatusTypeDef Relays_Init(void);
 HAL_StatusTypeDef Relays_DeInit(void);
 void Relay(RELAY a_Relay,LOGIC a_State);
-void Relays_Default();
+void Relays_Default(void);
 
 #endif /* __RELAY_CONFIG_H */
 

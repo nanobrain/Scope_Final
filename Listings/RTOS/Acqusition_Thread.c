@@ -52,21 +52,24 @@ void Acqusition_Thread (void const *argument) {
 
 	osSignalWait(sid_GuiInitialized,osWaitForever);
   while (1) {
+
 		if (Buttons_GetState() == 0)
-			Relay(REL_GND,FALSE);
+			Relay(REL_GND,TRUE);
 		else
-				Relay(REL_GND,TRUE);
+			Relay(REL_GND,FALSE);
+		
 		osMutexWait(mid_Acquisition,osWaitForever);
 		/* Critical section */
 		{
-			#if FAKE_WAVEFORM == 0
-			
+
 			if( ADC_Receive() != HAL_OK )
 				Error_Handler(ERROR_CONVERSION);
 			
-			while(ADC_Is_Received()) {}
-			
-			#endif
+			while(ADC_Is_Busy())
+			{
+				osDelay(1);
+			}
+
 		}
 		/* END of critical section */
 		osMutexRelease(mid_Acquisition); 	// ATT: Mutex can be released here ONLY if ADC_Receive is blocking!

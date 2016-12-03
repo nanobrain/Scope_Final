@@ -53,7 +53,7 @@ HAL_StatusTypeDef Init_spi()
 	g_hSpi.Init.CLKPhase = SPI_PHASE_1EDGE;
 	g_hSpi.Init.NSS = SPI_NSS_HARD_OUTPUT;
 	g_hSpi.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-	g_hSpi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+	g_hSpi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
 	g_hSpi.Init.FirstBit = SPI_FIRSTBIT_MSB;
 	g_hSpi.Init.TIMode = SPI_TIMODE_DISABLE;
 	g_hSpi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -111,17 +111,17 @@ void HAL_SPI_MspInit_IT(SPI_HandleTypeDef *hspi)
 		
 		/* SPI MISO GPIO pin configuration  */
 		GPIO_InitStructure.Pin = SPIx_MISO_PIN;
-		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_MEDIUM;
 		HAL_GPIO_Init(SPIx_MOSI_GPIO_PORT,&GPIO_InitStructure);
 		
 		/* SPI MOSI GPIO pin configuration  */
 		GPIO_InitStructure.Pin = SPIx_MOSI_PIN;
-		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_MEDIUM;
 		HAL_GPIO_Init(SPIx_MISO_GPIO_PORT,&GPIO_InitStructure);
 		
 		/* SPI NSS GPIO pin configuration */
 		GPIO_InitStructure.Pin = SPIx_NSS_PIN;
-		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_MEDIUM;
 		HAL_GPIO_Init(SPIx_NSS_PORT,&GPIO_InitStructure);
 		
 		/*##-3- Configure the NVIC for SPI #########################################*/ 
@@ -155,7 +155,7 @@ void HAL_SPI_MspInit_DMA(SPI_HandleTypeDef *hspi)
 		GPIO_InitStructure.Pin = SPIx_SCK_PIN;
 		GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStructure.Pull = GPIO_PULLUP;
-		GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
+		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_MEDIUM;
 		GPIO_InitStructure.Alternate = GPIO_AF5_SPI2;
 		HAL_GPIO_Init(SPIx_SCK_GPIO_PORT,&GPIO_InitStructure);
 		
