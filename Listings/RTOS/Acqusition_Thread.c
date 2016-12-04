@@ -52,12 +52,6 @@ void Acqusition_Thread (void const *argument) {
 
 	osSignalWait(sid_GuiInitialized,osWaitForever);
   while (1) {
-
-		if (Buttons_GetState() == 0) // TEMPORARY
-			Relay_Input(GND);
-		else
-			Relay_Input(INPUT);
-		
 		osMutexWait(mid_Acquisition,osWaitForever);
 		/* Critical section */
 		{
@@ -70,6 +64,5 @@ void Acqusition_Thread (void const *argument) {
 		/* END of critical section */
 		osMutexRelease(mid_Acquisition);
     osThreadYield ();                                         // suspend thread
-		
   }
 }

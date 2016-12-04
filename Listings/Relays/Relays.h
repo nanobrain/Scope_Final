@@ -31,8 +31,8 @@ typedef enum INPUT_GND{
 }INPUT_GND;
 
 typedef enum ATTENUATION{
-	db0,
-	db20	
+	DB0,
+	DB20	
 }ATTENUATION;
 
 /* Exported constants --------------------------------------------------------*/

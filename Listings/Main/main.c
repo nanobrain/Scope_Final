@@ -49,6 +49,7 @@
 #include "cmsis_os.h"                   // CMSIS RTOS header file
 #endif
 
+#include "GUI.h"
 #include "main.h"
 #include "Error_Handler.h"
 #include "Leds.h"
@@ -85,6 +86,10 @@ extern HAL_StatusTypeDef VGA_DeInit(void);
 extern HAL_StatusTypeDef ADC_Init(void);
 extern HAL_StatusTypeDef ADC_DeInit(void);
 extern HAL_StatusTypeDef ADC_Receive(void);
+
+// User welcome
+static void Demo_Run(void);
+static void Display_HelloMsg(void);
 
 /**
   * @brief  Main program
@@ -127,6 +132,13 @@ int main(void)
 
   /* Initialize */
 	System_Init();
+	
+	/* Initialize the Graphics Component */
+	GUI_Init();
+	/* Hello message */
+	Display_HelloMsg();
+	/* Test run */
+	Demo_Run();
 	
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
 	
@@ -179,6 +191,42 @@ static void System_Init(void)
 
 	Led(LEDGREEN,TRUE);
 	Relays_Default();
+}
+
+static void Display_HelloMsg(void)
+{
+	GUI_SetColor(GUI_BLUE);
+	GUI_SetFont(&GUI_Font24_1);
+	GUI_DispStringHCenterAt("Oscyloskop cyfrowy v1.2" , 240, 50);
+	GUI_DispStringHCenterAt("Adrian Kurylak" , 240, 75);
+	GUI_DispStringHCenterAt("Politechnika Wroclawska" , 240, 100);
+	GUI_SetColor(GUI_GREEN);
+	GUI_DispStringHCenterAt("Wcisnij przycisk" , 240, 175);
+	GUI_SetBkColor(GUI_WHITE);
+}
+
+static void Demo_Run(void)
+{
+	HAL_Delay(50);
+	Leds_All_Off();
+	HAL_Delay(100);
+	Relay_Input(GND);
+	Led(LEDRED1,1);
+	HAL_Delay(100);
+	Relay_ACDC(AC);
+	Led(LEDRED2,1);
+	HAL_Delay(100);
+	Relay_ACDC(DC);
+	Led(LEDRED3,1);
+	HAL_Delay(100);
+	Relay_Attenuator(DB0);
+	Led(LEDBLUE,1);
+	HAL_Delay(100);
+	Relay_Attenuator(DB20);
+	
+	Led(LEDGREEN,1);
+	Leds_All_Off();
+	while(Buttons_GetState() == 0){}
 }
 
 /**

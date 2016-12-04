@@ -98,11 +98,11 @@ void Relay_Input(INPUT_GND a_Value)
 	{
 		case INPUT:
 		{
-			_Relay(REL_GND,FALSE);
+			_Relay(REL_GND,TRUE);
 		}break;
 		case GND:
 		{
-			_Relay(REL_GND,TRUE);
+			_Relay(REL_GND,FALSE);
 		}break;
 		default:
 		{}break;
@@ -113,13 +113,13 @@ void Relay_Attenuator(ATTENUATION a_Value)
 {
 	switch(a_Value)
 	{
-		case db0:
-		{
-			_Relay(REL_ATT,TRUE);
-		}break;
-		case db20:
+		case DB0:
 		{
 			_Relay(REL_ATT,FALSE);
+		}break;
+		case DB20:
+		{
+			_Relay(REL_ATT,TRUE);
 		}break;
 		default:
 		{}break;
@@ -128,9 +128,9 @@ void Relay_Attenuator(ATTENUATION a_Value)
 
 void Relays_Default()
 {
-	_Relay(REL_GND,FALSE);
-	_Relay(REL_ATT,TRUE);
-	_Relay(REL_ACDC,FALSE);
+	Relay_Input(GND);
+	Relay_Attenuator(DB20);
+	Relay_ACDC(DC);
 }
 
 /**** END OF FILE ****/

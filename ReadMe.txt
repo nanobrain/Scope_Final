@@ -8,5 +8,5 @@ TODO:
 # Create API for scope
 # USE_FULL_ASSERT
 # Check influance of RoundRobin rotate time
-# Relays enums refactor to be more clear and esier to use
 # implement TOUCH_Calibrate
+# Better trigger alghoritm
