@@ -178,6 +178,7 @@ static void System_Init(void)
 		Error_Handler(ERROR_INIT);
 
 	Led(LEDGREEN,TRUE);
+	Relays_Default();
 }
 
 /**

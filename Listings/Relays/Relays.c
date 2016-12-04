@@ -56,7 +56,7 @@ HAL_StatusTypeDef Relays_DeInit(void)
 	return HAL_OK;
 }
 
-void Relay(RELAY a_Relay,LOGIC a_State)
+static void _Relay(RELAY a_Relay,LOGIC a_State)
 {
 	switch(a_Relay)
 	{
@@ -75,11 +75,62 @@ void Relay(RELAY a_Relay,LOGIC a_State)
 	}
 }
 
+void Relay_ACDC(ACDC a_Value)
+{
+	switch(a_Value)
+	{
+		case AC:
+		{
+			_Relay(REL_ACDC,TRUE);
+		}break;
+		case DC:
+		{
+			_Relay(REL_ACDC,FALSE);
+		}break;
+		default:
+		{}break;
+	}
+}
+
+void Relay_Input(INPUT_GND a_Value)
+{
+	switch(a_Value)
+	{
+		case INPUT:
+		{
+			_Relay(REL_GND,FALSE);
+		}break;
+		case GND:
+		{
+			_Relay(REL_GND,TRUE);
+		}break;
+		default:
+		{}break;
+	}
+}
+
+void Relay_Attenuator(ATTENUATION a_Value)
+{
+	switch(a_Value)
+	{
+		case db0:
+		{
+			_Relay(REL_ATT,TRUE);
+		}break;
+		case db20:
+		{
+			_Relay(REL_ATT,FALSE);
+		}break;
+		default:
+		{}break;
+	}
+}
+
 void Relays_Default()
 {
-	Relay(REL_GND,FALSE);
-	Relay(REL_ATT,TRUE);
-	Relay(REL_ACDC,FALSE);
+	_Relay(REL_GND,FALSE);
+	_Relay(REL_ATT,TRUE);
+	_Relay(REL_ACDC,FALSE);
 }
 
 /**** END OF FILE ****/

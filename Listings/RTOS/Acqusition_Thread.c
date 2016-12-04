@@ -54,9 +54,9 @@ void Acqusition_Thread (void const *argument) {
   while (1) {
 
 		if (Buttons_GetState() == 0) // TEMPORARY
-			Relay(REL_GND,TRUE);
+			Relay_Input(GND);
 		else
-			Relay(REL_GND,FALSE);
+			Relay_Input(INPUT);
 		
 		osMutexWait(mid_Acquisition,osWaitForever);
 		/* Critical section */

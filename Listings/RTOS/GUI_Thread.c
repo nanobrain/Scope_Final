@@ -24,8 +24,10 @@
 #include "HEADER.h"
 #include "FRAMEWIN.h"
 #include "DIALOG.h"
+#include "MULTIPAGE.h"
 #include "main.h"
 #include "Error_Handler.h"
+#include "Trigger_Line.h"
 #include "ADC_Config.h"
 #include "Relays.h"
 #include "Leds.h"
@@ -42,6 +44,7 @@
 #define GUI_HDLG_ID_GRAPH_WIN 2
 
 /* Screen & windows sizes */
+// User space
 #define SCREENSIZEX				480
 #define SCREENSIZEY				272
 #define USERSPACESTARTX		GRAPHENDX
@@ -50,30 +53,62 @@
 #define USERSPACESIZEY		USERSPACEENDY-USERSPACESTARTY
 #define USERSPACEENDX			SCREENSIZEX
 #define USERSPACEENDY			SCREENSIZEY
+
+// Scope graph
 #define GRIDLS						GUI_LS_DOT
-#define GRAPHCOUNTX 			14
+#define GRAPHCOUNTX 			12
 #define GRAPHCOUNTY				8
 #define GRAPHUNITSIZE			34
 #define GRAPHSIZEX				GRAPHCOUNTX*GRAPHUNITSIZE
 #define GRAPHSIZEY				GRAPHCOUNTY*GRAPHUNITSIZE
-#define GRAPHSTARTX				GRAPHUNITSIZE
+#define GRAPHSTARTX				0
 #define GRAPHSTARTY				0
 #define GRAPHENDX					GRAPHSTARTX + GRAPHSIZEX
 #define GRAPHENDY					GRAPHSTARTY + GRAPHSIZEY
 
-#define GUI_ID_SCOPE_GRAPH	GUI_ID_USER + 1
-#define GUI_ID_AUTOTRIGGER	GUI_ID_USER + 2
+// Small button
+#define SBUTTON_WIDTH			40
+#define SBUTTON_HEIGHT		20
+// Big button
+#define BBUTTON_WIDTH			80
+#define BBUTTON_HEIGHT		20
+
+/* GUI elements IDs */
+#define GUI_ID_MAIN_SCOPE_GRAPH									GUI_ID_USER
+#define GUI_ID_MAIN_MULTIPAGE										GUI_ID_USER + 1
+#define GUI_ID_MULTIPAGE_INPUT_RAD_ACDC					GUI_ID_USER + 2
+#define GUI_ID_MULTIPAGE_INPUT_RAD_ACDC_TEXT1		GUI_ID_USER + 3
+#define GUI_ID_MULTIPAGE_INPUT_RAD_ACDC_TEXT2		GUI_ID_USER + 4
+#define GUI_ID_MULTIPAGE_INPUT_RAD_ACDC_TEXT3		GUI_ID_USER + 5
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 static uint16_t _TriggerPoint=127;
-//
-// Graph data handle
-//
 static GRAPH_DATA_Handle _hGraphData;
-//
+
+// Threads items
+osThreadId tid_GUIThread;
+osThreadDef (GUIThread, TH_GUIPRIORITY, 1, TH_GUISTACK);
+
+// Widgets sizes design
+typedef struct BUTTON{
+	uint8_t Width;
+	uint8_t Height;
+}BUTTON;
+
+
+// Main window
+static const GUI_WIDGET_CREATE_INFO _aMainWindowCreate[] = {
+  {	WINDOW_CreateIndirect, "Background_Window", 0, 0, 0, SCREENSIZEX, SCREENSIZEY },
+	{	GRAPH_CreateIndirect, 0, GUI_ID_MAIN_SCOPE_GRAPH, GRAPHSTARTX, GRAPHSTARTY, GRAPHSIZEX, GRAPHSIZEY },
+};
+
+// Input tab
+static const GUI_WIDGET_CREATE_INFO _InputTab[] = {
+  { WINDOW_CreateIndirect, "Input",	0,	0,	0,	USERSPACESIZEX,	USERSPACESIZEY,	FRAMEWIN_CF_MOVEABLE },
+};
+
 // Colors to be used in graph window
-//
 typedef struct GUI_Colors{
 	GUI_COLOR BackGround;
 	GUI_COLOR GraphBackGround;
@@ -84,21 +119,10 @@ typedef struct GUI_Colors{
 	GUI_COLOR Waveform;
 }GUI_Colors;
 static GUI_Colors _GuiColors;
-//
-// Dialog resource
-//
-static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
-  {	WINDOW_CreateIndirect,		"Background_Window",		0,									0,		0,		SCREENSIZEX,	SCREENSIZEY		},
-	{	GRAPH_CreateIndirect,			0,											GUI_ID_SCOPE_GRAPH,	0,		0,		GRAPHSIZEX,		GRAPHSIZEY		},
-	{	BUTTON_CreateIndirect,		"Auto-Trigger",					GUI_ID_AUTOTRIGGER,	400,	250,	80,						22						}
-};
-
-// Threads items
-osThreadId tid_GUIThread;
-osThreadDef (GUIThread, TH_GUIPRIORITY, 1, TH_GUISTACK);
 
 /* Private function prototypes -----------------------------------------------*/
 static void _cbCallback(WM_MESSAGE * pMsg);
+static void _cbTriggerLine(WM_MESSAGE * pMsg);
 static void Demo_Run(void);
 static void Display_HelloMsg(void);
 
@@ -111,19 +135,17 @@ int Init_GUIThread (void) {
 }
 
 void GUIThread (void const *argument) {
-	WM_HWIN hDlg;
+	WM_HWIN hDlg,hDialog;
 	WM_HWIN hGraph;
+	WM_HWIN hMultiPage;
 	uint16_t i,triggerVal;
-	GUI_MEMDEV_Handle hMem0,hMem1;
-	GUI_RECT Client_Rect;
+	char acExtraBytes[20] = "";
 
   GUI_Init();                     /* Initialize the Graphics Component */
 	/* Hello message */
 	Display_HelloMsg();
 	/* Test run */
 	//Demo_Run();
-	/* Relays in safe position */
-	Relays_Default();
 	
 	/* Define GUI colors */
 	_GuiColors.BackGround 			= GUI_WHITE;
@@ -135,10 +157,15 @@ void GUIThread (void const *argument) {
 	_GuiColors.Waveform					= GUI_GREEN;
 	
 	WM_SetCreateFlags(WM_CF_MEMDEV);
-	hDlg = GUI_CreateDialogBox(_aDialogCreate, GUI_COUNTOF(_aDialogCreate), _cbCallback, 0, 0, 0);
-	hGraph = WM_GetDialogItem(hDlg, GUI_ID_SCOPE_GRAPH);
-	//WM_EnableMemdev(hGraph);
-	WM_GetClientRectEx(hDlg,&Client_Rect);
+	hDlg = GUI_CreateDialogBox(_aMainWindowCreate, GUI_COUNTOF(_aMainWindowCreate), _cbCallback, 0, 0, 0);
+	hGraph = WM_GetDialogItem(hDlg, GUI_ID_MAIN_SCOPE_GRAPH);
+	hMultiPage = MULTIPAGE_CreateEx(USERSPACESTARTX,USERSPACESTARTY,USERSPACESIZEX,USERSPACESIZEY,WM_GetClientWindow(hDlg),WM_CF_SHOW,0,GUI_ID_MAIN_MULTIPAGE);
+	hDialog = GUI_CreateDialogBox(_InputTab, GUI_COUNTOF(_InputTab), NULL, WM_UNATTACHED, 0, 0);
+	MULTIPAGE_AddPage(hMultiPage, hDialog, "Input");
+	hDialog = Trigger_Line_Create(0,136-GRAPHUNITSIZE/2,GRAPHSIZEX,GRAPHUNITSIZE, NULL, WM_CF_SHOW | WM_CF_MOTION_Y, NULL, _cbTriggerLine, strlen(acExtraBytes));
+	Trigger_Line_SetUserData(hDialog, acExtraBytes,strlen(acExtraBytes));
+	WM_MOTION_Enable(1);
+	WM_SetHasTrans(hDialog);
 	
 	/* Indicate full initialization finish */
 	osSignalSet(tid_Acqusition_Thread,sid_GuiInitialized);
@@ -152,7 +179,7 @@ void GUIThread (void const *argument) {
 		{
 			GRAPH_DATA_YT_Clear(_hGraphData);
 			
-			triggerVal = Trigger(200,g_d8_RxBufferMain1,RX_BUFFERCOUNT);
+			triggerVal = Trigger(_TriggerPoint,g_d8_RxBufferMain1,RX_BUFFERCOUNT);
 			for(i=triggerVal;i<GRAPHSIZEX+triggerVal;i++)
 			{
 				GRAPH_DATA_YT_AddValue(_hGraphData,(short)g_d8_RxBufferMain1[i].payload);
@@ -169,16 +196,17 @@ static void _cbCallback(WM_MESSAGE * pMsg) {
   unsigned i;
   WM_HWIN  hDlg;
   WM_HWIN  hItem;
+	//uint16_t TriggerLineYPos;
 
   hDlg = pMsg->hWin;
   switch (pMsg->MsgId) {
 			  case WM_INIT_DIALOG:
-						hItem = WM_GetDialogItem(hDlg, GUI_ID_SCOPE_GRAPH);
+						hItem = WM_GetDialogItem(hDlg, GUI_ID_MAIN_SCOPE_GRAPH);
 						_hGraphData = GRAPH_DATA_YT_Create(_GuiColors.Waveform, SCREENSIZEX, 0, 0);
 						GRAPH_AttachData(hItem,_hGraphData);
 						GRAPH_DATA_YT_SetAlign(_hGraphData,GRAPH_ALIGN_LEFT);
 						//GRAPH_SetVSizeX(hItem,RX_BUFFERCOUNT-50);
-						GRAPH_SetBorder(hItem,1,1,1,1);
+						//GRAPH_SetBorder(hItem,0,0,0,0);
 						GRAPH_SetGridDistX(hItem, GRAPHUNITSIZE);
 						GRAPH_SetGridDistY(hItem, GRAPHUNITSIZE);
 						GRAPH_SetLineStyleH(hItem,GRIDLS);
@@ -207,20 +235,14 @@ static void _cbCallback(WM_MESSAGE * pMsg) {
 						GRAPH_AttachScale(hItem, _hScaleH);
 				*/
 				break;
-				case WM_TOUCH:
-						
-				break;
-				case WM_TIMER:
-						
-				break;
 				case WM_NOTIFY_PARENT:
 					if (pMsg->Data.v == WM_NOTIFICATION_RELEASED)
 					{
 						int Id = WM_GetId(pMsg->hWinSrc);
 						switch(Id)
 						{
-							case GUI_ID_AUTOTRIGGER:
-								Auto_Trigger();
+							//case GUI_ID_MULTIPAGE_BT_ACD:
+							//	BUTTON_GetText( )
 							break;
 						}
 					}
@@ -228,7 +250,22 @@ static void _cbCallback(WM_MESSAGE * pMsg) {
     WM_DefaultProc(pMsg);
   }
 }
-	
+
+static void _cbTriggerLine(WM_MESSAGE * pMsg) {
+  GUI_RECT WinRect;
+  char acText[20] = { 0 };
+
+  switch (pMsg->MsgId) {
+  case WM_PAINT:
+    Trigger_Line_Callback(pMsg);
+    Trigger_Line_GetUserData(pMsg->hWin, acText, sizeof(acText));
+		_TriggerPoint = 255 - WM_GetWindowOrgY(pMsg->hWin);
+    break;
+  default:
+    Trigger_Line_Callback(pMsg);
+  }
+}
+
 static void Display_HelloMsg(void)
 {
 	GUI_SetColor(GUI_BLUE);
@@ -248,21 +285,21 @@ static void Demo_Run(void)
 	
 	Leds_All_Off();
 	HAL_Delay(100);
-	Relay(REL_GND,TRUE);
+	Relay_Input(GND);
 	Led(LEDRED1,1);
 	HAL_Delay(100);
-	Relay(REL_ATT,TRUE);
+	Relay_ACDC(AC);
 	Led(LEDRED2,1);
 	HAL_Delay(100);
-	Relay(REL_ACDC,TRUE);
+	Relay_ACDC(DC);
 	Led(LEDRED3,1);
 	HAL_Delay(100);
-	Relay(REL_GND,FALSE);
+	Relay_Attenuator(db0);
 	Led(LEDBLUE,1);
 	HAL_Delay(100);
-	Relay(REL_ATT,FALSE);
+	Relay_Attenuator(db20);
+	
 	Led(LEDGREEN,1);
-	HAL_Delay(100);
-	Relay(REL_ACDC,FALSE);
 	Leds_All_Off();
 }
+

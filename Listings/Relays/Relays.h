@@ -20,6 +20,21 @@ typedef enum RELAY{
 	REL_ACDC
 }RELAY;
 
+typedef enum ACDC{
+	AC,
+	DC
+}ACDC;
+
+typedef enum INPUT_GND{
+	INPUT,
+	GND
+}INPUT_GND;
+
+typedef enum ATTENUATION{
+	db0,
+	db20	
+}ATTENUATION;
+
 /* Exported constants --------------------------------------------------------*/
 /* Definition for Pins */
 #define REL_GND_PIN											GPIO_PIN_7
@@ -36,7 +51,10 @@ typedef enum RELAY{
 /* Functions ------------------------------------------------------- */
 HAL_StatusTypeDef Relays_Init(void);
 HAL_StatusTypeDef Relays_DeInit(void);
-void Relay(RELAY a_Relay,LOGIC a_State);
+static void _Relay(RELAY a_Relay,LOGIC a_State);
+void Relay_ACDC(ACDC a_Value);
+void Relay_Input(INPUT_GND a_Value);
+void Relay_Attenuator(ATTENUATION a_Value);
 void Relays_Default(void);
 
 #endif /* __RELAY_CONFIG_H */
