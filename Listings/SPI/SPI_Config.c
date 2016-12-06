@@ -68,18 +68,18 @@ HAL_StatusTypeDef Init_spi()
 
 void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 {
-	if ( SPI_DMA )
+	//if ( SPI_DMA )
 		HAL_SPI_MspInit_DMA(hspi);
-	else
-		HAL_SPI_MspInit_IT(hspi);
+	//else
+	//	HAL_SPI_MspInit_IT(hspi);
 }
 
 void HAL_SPI_MspDeInit(SPI_HandleTypeDef *hspi)
 {
-	if ( SPI_DMA )
+	//if ( SPI_DMA )
 		HAL_SPI_MspDeInit_DMA(hspi);
-	else
-		HAL_SPI_MspDeInit_IT(hspi);
+//	else
+	//	HAL_SPI_MspDeInit_IT(hspi);
 }
 
 void HAL_SPI_MspInit_IT(SPI_HandleTypeDef *hspi)
@@ -244,6 +244,8 @@ void HAL_SPI_MspDeInit_IT(SPI_HandleTypeDef *hspi)
     HAL_GPIO_DeInit(SPIx_MISO_GPIO_PORT, SPIx_MISO_PIN);
     /* Deconfigure SPI MOSI */
     HAL_GPIO_DeInit(SPIx_MOSI_GPIO_PORT, SPIx_MOSI_PIN);
+		/* Deconfigure NSS ( it is used ONLY for Rx for ADC ) */
+    HAL_GPIO_DeInit(SPIx_NSS_PORT, SPIx_NSS_PIN);
 
     /*##-3- Disable the NVIC for SPI ###########################################*/
     HAL_NVIC_DisableIRQ(SPIx_IRQn);
@@ -279,4 +281,21 @@ void HAL_SPI_MspDeInit_DMA(SPI_HandleTypeDef *hspi)
     /*##-3- Disable the NVIC for SPI ###########################################*/
     HAL_NVIC_DisableIRQ(SPIx_IRQn);
   }
+}
+
+void SPI_NSS_Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	SPIx_NSS_GPIO_CLK_ENABLE();
+	GPIO_InitStructure.Pin = SPIx_NSS_PIN;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Pull = GPIO_PULLUP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_MEDIUM;
+	GPIO_InitStructure.Alternate = GPIO_AF5_SPI2;
+	HAL_GPIO_Init(SPIx_NSS_PORT,&GPIO_InitStructure);
+}
+
+void SPI_NSS_DeInit(void)
+{
+	 HAL_GPIO_DeInit(SPIx_NSS_PORT, SPIx_NSS_PIN);
 }

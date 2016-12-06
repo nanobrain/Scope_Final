@@ -17,18 +17,20 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "VGA_Config.h"
+#include "Error_Handler.h"
 #include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static uint8_t u8_txBuffer[3];
-static uint8_t u8_CurrentGain=0;
+static TXBUFFER _CurrentState;
+VGA_GAIN _CurrentGain;
 extern SPI_HandleTypeDef g_hSpi;
 
 /* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
 
 HAL_StatusTypeDef VGA_Init(void)
 {
@@ -44,7 +46,15 @@ HAL_StatusTypeDef VGA_Init(void)
 		GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
 		HAL_GPIO_Init(VGA_SPIx_CS_GPIO_PORT,&GPIO_InitStructure);
 		HAL_GPIO_WritePin(VGA_SPIx_CS_GPIO_PORT,VGA_SPIx_CS_PIN,GPIO_PIN_SET);
-		errCode=HAL_OK;
+		
+		memset((void*)&_CurrentState.buffer,0,sizeof(_CurrentState.buffer));	// Clear. NECESSARY!!
+		_CurrentState.fields.power 	= 0x1;		// Aux Hi-Z
+		_CurrentState.fields.filter = 0x1;		// Lowest filter (20 MHz)
+		_CurrentState.fields.ladder = 0x9;		// Lowest gain
+		_CurrentState.fields.preAmp = 0x0;		// Lowest gain
+		_CurrentGain = DB0_84;
+		
+		errCode = VGA_Transmit();
 	}
 	else
 	{
@@ -60,57 +70,138 @@ HAL_StatusTypeDef VGA_DeInit(void)
 	return HAL_OK;
 }
 
-HAL_StatusTypeDef Set_VGA_Power_Mode(VGA_POWER_MODE a_PowerMode)
+int VGA_Step_Gain(STEP_DIRECTION a_Direction)
 {
-	HAL_StatusTypeDef errCode=HAL_OK;
-	switch(a_PowerMode)
+	VGA_GAIN curGain=0;
+	curGain = VGA_Get_Gain();
+	switch(a_Direction)
 	{
-		case POWER_FULL:
+		case STEP_UP:
 		{
-			/**/
+			if( curGain == DB38_84 )
+				return -1;
+			else
+				VGA_Set_Gain((VGA_GAIN)(curGain + 1));
 		}break;
-		case AUX_HIGHZ:
+		case STEP_DOWN:
 		{
-			/**/
-		}break;
-		case HIGHZ:
-		{
-			/**/
+			if( curGain == DB0_84 )
+				return -1;
+			else
+				VGA_Set_Gain((VGA_GAIN)(curGain - 1));
 		}break;
 		default:
-		{
-			/**/
-		}
+			Error_Handler(ERROR_TRANSMIT);
 	}
-	return errCode;
+	return 0;
 }
 
-HAL_StatusTypeDef Set_VGA_Gain(uint8_t a_8u_gain)
-{
-	// TODO: Implement
-	u8_CurrentGain = a_8u_gain;
-	return HAL_ERROR;
-}
-
-uint8_t Get_VGA_Gain(void)
-{
-	return u8_CurrentGain;
-}
-
-VGA_POWER_MODE Get_VGA_Power_Mode(void)
-{
-	return POWER_FULL;
-}
-
-static HAL_StatusTypeDef VGA_Transmit(uint8_t*  a_p8u_Data)
+void VGA_Set_Gain(VGA_GAIN a_gain)
 {
 	HAL_StatusTypeDef errCode=HAL_OK;
+	
+	// G = PreAmp + Constant - Ladder
+	// G = ( HG OR LG ) + 8.86 - 2n
+	// G = 10 + 8.86 - 2n = 18.86 - 2n
+	// G = 30 + 8.86 - 2n = 38.86 - 2n
+	// EXAMPLE:
+	// G = 14.86
+	// PreAmp = LG = 10
+	// Constant = 8.86
+	// Ladder = - 2*2 = - 4
+	// G = 10 + 8.86 - 4	
+	
+	// Calculate enum value
+	if( a_gain > DB18_84 )
+	{
+		_CurrentState.fields.preAmp = 0x1;
+		_CurrentState.fields.ladder = (20UL - a_gain)&0xF;
+	}
+	else if( a_gain == DB18_84 )
+	{
+		_CurrentState.fields.preAmp = 0x1;
+		_CurrentState.fields.ladder = (10UL - a_gain)&0xF;
+	}
+	else if( a_gain < DB18_84 )
+	{
+		_CurrentState.fields.preAmp = 0x0;
+		_CurrentState.fields.ladder = (10UL - a_gain)&0xF;
+	}
+	else
+		Error_Handler(ERROR_TRANSMIT);
+	
+	errCode = VGA_Transmit();
+	_CurrentGain = a_gain;
+	
+	if( errCode != HAL_OK )
+		Error_Handler(ERROR_TRANSMIT);
+}
+
+VGA_GAIN VGA_Get_Gain(void)
+{
+	/*
+	VGA_GAIN curGain;
+	
+	// Calculate enum value
+	if( _CurrentState.fields.preAmp == 1 )
+	{
+		if( (unsigned long)_CurrentState.fields.ladder == 0)
+			curGain = DB18_84;
+		else
+			curGain =(VGA_GAIN)(20UL - (unsigned long)_CurrentState.fields.ladder);
+	}
+	else if( _CurrentState.fields.preAmp == 0 )
+	{
+		curGain = (VGA_GAIN)(10UL - (unsigned long)_CurrentState.fields.ladder);
+	}
+	else
+		Error_Handler(ERROR_TRANSMIT);
+	
+	return curGain;
+	*/
+	return _CurrentGain;
+}
+
+static HAL_StatusTypeDef VGA_Transmit(void)
+{
+	HAL_StatusTypeDef errCode=HAL_OK;
+	uint8_t Data[4];
+	
 	if( HAL_SPI_GetState(&g_hSpi) != HAL_SPI_STATE_RESET )// If SPI initialized
 	{
+		
+		SPI_NSS_DeInit();
 		VGA_CS_Write(FALSE);
-		errCode = HAL_SPI_Transmit_DMA(&g_hSpi,a_p8u_Data,BUFFERSIZE(a_p8u_Data));
+		
+		//Set command to Write
+		Data[0] = _CurrentState.buffer[1];
+		Data[1] = 0;
+		Data[2] = 0;
+		Data[3] = _CurrentState.buffer[0];
+		
+		/*
+		buffer |= (_CurrentState.fields.command	<< 16)&0xFF;
+		buffer |= (_CurrentState.fields.power		<< 10)&0x1;
+		buffer |= (_CurrentState.fields.filter	<< 8)&0x7;
+		buffer |= (_CurrentState.fields.preAmp	<< 4)&0x1;
+		buffer |= (_CurrentState.fields.ladder			)&0xF;
+		*/
+		
+		if( SPI_DMA )
+		{
+			errCode = HAL_SPI_Transmit_DMA(&g_hSpi,Data,1);
+			errCode = HAL_SPI_Transmit_DMA(&g_hSpi,Data+2,1);
+		}
+		else
+		{
+			errCode = HAL_SPI_Transmit_IT(&g_hSpi,Data,1);
+			errCode = HAL_SPI_Transmit_IT(&g_hSpi,Data+2,1);
+		}
+		
 		while(HAL_SPI_GetState(&g_hSpi) == HAL_SPI_STATE_BUSY_TX ) {}
+		
 		VGA_CS_Write(TRUE);
+		SPI_NSS_Init();
 	}
 	else
 	{
@@ -127,15 +218,4 @@ static void VGA_CS_Write(LOGIC a_SetReset)
 		HAL_GPIO_WritePin(VGA_SPIx_CS_GPIO_PORT,VGA_SPIx_CS_PIN,GPIO_PIN_RESET);
 }
 
-static void Set_VGA_Preamp_Gain(VGA_PREAMP_GAIN a_gain)
-{
-		if( a_gain == HG )
-		{
-			/**/
-		}
-	else
-		{
-			/**/
-		}
-}
 /**** END OF FILE ****/

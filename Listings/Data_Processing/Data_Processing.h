@@ -14,15 +14,17 @@
 
 /* Private typedef -----------------------------------------------------------*/
 typedef struct Data8{
-	int :4;
-	int payload:8;
-	int :4;
+	int /*NULL*/	:4;
+	int payload		:8;
+	int /*NULL*/	:4;
+// Bits:				16
 } __attribute__ ((__packed__)) Data8;
 
 typedef struct Data10{
-	int :4;
-	int payload:10;
-	int :2;
+	int /*NULL*/	:4;
+	int payload		:10;
+	int /*NULL*/	:2;
+// Bits:				16
 } __attribute__ ((__packed__)) Data10 ;
 
 /* Private define ------------------------------------------------------------*/

@@ -40,9 +40,8 @@ void Trigger_Line_Callback(WM_MESSAGE * pMsg) {
   GUI_PID_STATE*			pState;
   Trigger_Line_Obj		TriggerLine;
   GUI_RECT						WinRect;
-  GUI_COLOR						Color;
+  GUI_COLOR						Color1,Color2;
   U8									Pressed;
-	U32									Transparency;
 	U16									Height;
 	U16									Width;
 
@@ -57,24 +56,27 @@ void Trigger_Line_Callback(WM_MESSAGE * pMsg) {
 		{
       if (TriggerLine.Pressed)
 			{
-        Color = TriggerLine.FocusedColor;
+        Color1 = TriggerLine.FocusedColor;
+				Color2 = GUI_RED;
 			}
 			else
 			{
-        Color = TRANSPARENCY_VERY_HIGH | TriggerLine.NoFocusedColor;
+        Color1 = TRANSPARENCY_VERY_HIGH | TriggerLine.NoFocusedColor;
+				Color2 = TRANSPARENCY_HIGH | GUI_RED;
 			}
 		}
 		else
 		{
-			Color = TriggerLine.DisabledColor;
+			Color1 = TriggerLine.DisabledColor;
+			Color2 = GUI_RED;
 		}
 		
 		GUI_EnableAlpha(1);
 		GUI_SetPenSize(5);
-		GUI_SetColor(GUI_BLUE);
+		GUI_SetColor(Color2);
 		GUI_DrawCircle(10,Height/2,10);
 		GUI_SetPenSize(1);
-		GUI_SetColor(Color);
+		GUI_SetColor(Color1);
 		GUI_FillCircle(10,Height/2,10);
 		GUI_DrawLine(WinRect.x0,Height/2,Width,Height/2);
 		

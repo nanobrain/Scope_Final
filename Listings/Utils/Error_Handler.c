@@ -46,6 +46,7 @@ void Error_Handler(ERRCODE a_errCode)
 			}
 		}break;
 		case ERROR_CONVERSION:
+		case ERROR_TRANSMIT:
 		{
 			while(1)
 			{

@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>OS_STKCHECK</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Listings;.\Listings\ADC;.\Listings\RTOS;.\Listings\DAC;.\Listings\SPI;.\Listings\Leds;.\Listings\Relays;.\Listings\Utils;.\Listings\Main;.\Listings\Data_Processing</IncludePath>
+              <IncludePath>.\Listings;.\Listings\ADC;.\Listings\RTOS;.\Listings\DAC;.\Listings\SPI;.\Listings\Leds;.\Listings\Relays;.\Listings\Utils;.\Listings\Main;.\Listings\Data_Processing;.\Listings\GUI</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -377,6 +377,21 @@
       </TargetOption>
       <Groups>
         <Group>
+          <GroupName>Utils</GroupName>
+          <Files>
+            <File>
+              <FileName>Error_Handler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Listings\Utils\Error_Handler.c</FilePath>
+            </File>
+            <File>
+              <FileName>Error_Handler.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Listings\Utils\Error_Handler.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>Main</GroupName>
           <Files>
             <File>
@@ -417,17 +432,17 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Utils</GroupName>
+          <GroupName>GUI</GroupName>
           <Files>
             <File>
-              <FileName>Error_Handler.c</FileName>
+              <FileName>Trigger_Line.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Listings\Utils\Error_Handler.c</FilePath>
+              <FilePath>.\Listings\GUI\Trigger_Line.c</FilePath>
             </File>
             <File>
-              <FileName>Error_Handler.h</FileName>
+              <FileName>Trigger_Line.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\Listings\Utils\Error_Handler.h</FilePath>
+              <FilePath>.\Listings\GUI\Trigger_Line.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -527,16 +542,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Documents</GroupName>
-          <Files>
-            <File>
-              <FileName>ReadMe.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\ReadMe.txt</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>Data_Processing</GroupName>
           <Files>
             <File>
@@ -548,6 +553,16 @@
               <FileName>Data_Processing.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Listings\Data_Processing\Data_Processing.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Documents</GroupName>
+          <Files>
+            <File>
+              <FileName>ReadMe.txt</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\ReadMe.txt</FilePath>
             </File>
           </Files>
         </Group>

@@ -130,6 +130,7 @@ int main(void)
   /* Configure the System clock to have a frequency of 216 MHz */
   SystemClock_Config();
 
+	HAL_Delay(500);
   /* Initialize */
 	System_Init();
 	
@@ -197,7 +198,7 @@ static void Display_HelloMsg(void)
 {
 	GUI_SetColor(GUI_BLUE);
 	GUI_SetFont(&GUI_Font24_1);
-	GUI_DispStringHCenterAt("Oscyloskop cyfrowy v1.2" , 240, 50);
+	GUI_DispStringHCenterAt("Oscyloskop cyfrowy v1.0" , 240, 50);
 	GUI_DispStringHCenterAt("Adrian Kurylak" , 240, 75);
 	GUI_DispStringHCenterAt("Politechnika Wroclawska" , 240, 100);
 	GUI_SetColor(GUI_GREEN);

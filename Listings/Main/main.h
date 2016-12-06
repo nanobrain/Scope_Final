@@ -111,6 +111,9 @@ typedef enum LOGIC{
 #define MEMCP_DMAx_IRQn										DMA1_Stream1_IRQn
 
 /* Exported functions ------------------------------------------------------- */
+void SPI_NSS_Init(void);
+void SPI_NSS_DeInit(void);
+
 /* Exported variables ------------------------------------------------------- */
 extern Data8 g_d8_RxBufferMain1[RX_BUFFERCOUNT];
 //extern Data8 g_d8_RxBufferMain2[RX_BUFFERCOUNT];

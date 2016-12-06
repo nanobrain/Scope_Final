@@ -29,6 +29,7 @@
 #include "Error_Handler.h"
 #include "Trigger_Line.h"
 #include "ADC_Config.h"
+#include "VGA_Config.h"
 #include "Relays.h"
 #include "Leds.h"
 #include "Threads.h"
@@ -89,6 +90,8 @@
 #define GUI_ID_USERSPACE_IN							GUI_ID_USER + 6
 #define GUI_ID_USERSPACE_ATT1						GUI_ID_USER + 7
 #define GUI_ID_USERSPACE_ATT10					GUI_ID_USER + 8
+#define GUI_ID_USERSPACE_GAINUP					GUI_ID_USER + 9
+#define GUI_ID_USERSPACE_GAINDOWN				GUI_ID_USER + 10
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -185,6 +188,8 @@ void GUIThread (void const *argument) {
 static void _GraphCallback(WM_MESSAGE * pMsg) {
   WM_HWIN		hDlg;
   WM_HWIN		hItem;
+	WM_HWIN		hScaleV;
+	WM_HWIN		hScaleH;
 
   hDlg = pMsg->hWin;
   switch (pMsg->MsgId) {
@@ -195,7 +200,7 @@ static void _GraphCallback(WM_MESSAGE * pMsg) {
 			GRAPH_AttachData(hItem,_hGraphData);
 			GRAPH_DATA_YT_SetAlign(_hGraphData,GRAPH_ALIGN_LEFT);
 			//GRAPH_SetVSizeX(hItem,RX_BUFFERCOUNT-50);
-			//GRAPH_SetBorder(hItem,0,0,0,0);
+			GRAPH_SetBorder(hItem,1,1,1,1);
 			GRAPH_SetGridDistX(hItem, GRAPHUNITSIZE);
 			GRAPH_SetGridDistY(hItem, GRAPHUNITSIZE);
 			GRAPH_SetLineStyleH(hItem,GRIDLS);
@@ -206,23 +211,6 @@ static void _GraphCallback(WM_MESSAGE * pMsg) {
 			GRAPH_SetColor(hItem,_GuiColors.Border,GRAPH_CI_BORDER);
 			GRAPH_SetColor(hItem,_GuiColors.Frame,GRAPH_CI_FRAME);
 			GRAPH_SetColor(hItem,_GuiColors.Grid,GRAPH_CI_GRID);
-			//GRAPH_SetUserDraw(hItem, _UserDraw);
-			//
-			// Create and add vertical scale
-			//
-	/*
-			_hScaleV = GRAPH_SCALE_Create( 35, GUI_TA_RIGHT, GRAPH_SCALE_CF_VERTICAL, 25);
-			GRAPH_SCALE_SetTextColor(_hScaleV, GUI_YELLOW);
-			GRAPH_AttachScale(hItem, _hScaleV);
-	*/
-			//
-			// Create and add horizontal scale
-			//
-	/*
-			_hScaleH = GRAPH_SCALE_Create(155, GUI_TA_HCENTER, GRAPH_SCALE_CF_HORIZONTAL, 50);
-			GRAPH_SCALE_SetTextColor(_hScaleH, GUI_DARKGREEN);
-			GRAPH_AttachScale(hItem, _hScaleH);
-	*/
 		} break;
 		/*case WM_NOTIFY_PARENT:
 		{
@@ -273,7 +261,7 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 			offset=0;
 			x0 = USERSPACEPADDINGX;
 			y0 = USERSPACEPADDINGY;
-			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_HCENTER,0,0,"Coupling");
+			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_VCENTER,0,0,"Coupling");
 			x0 = x0;
 			y0 = USERSPACEPADDINGY*2+TEXT_HEIGHT;
 			hButton = BUTTON_CreateEx(x0,y0,SBUTTON_WIDTH,SBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_AC);
@@ -286,10 +274,10 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 			WM_DisableWindow(hButton);
 			
 			// GND/IN text and buttons
-			offset+= TEXT_HEIGHT + SBUTTON_HEIGHT + 4*USERSPACEPADDINGY;
+			offset+= TEXT_HEIGHT + SBUTTON_HEIGHT + 3*USERSPACEPADDINGY;
 			x0 = USERSPACEPADDINGX;
 			y0 = USERSPACEPADDINGY + offset;
-			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_HCENTER,0,0,"Input");
+			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_VCENTER,0,0,"Input");
 			x0 = x0;
 			y0 = USERSPACEPADDINGY*2+TEXT_HEIGHT + offset;
 			hButton = BUTTON_CreateEx(x0,y0,SBUTTON_WIDTH,SBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_GND);
@@ -302,10 +290,10 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 			WM_EnableWindow(hButton);
 			
 			// GND/IN text and buttons
-			offset+= TEXT_HEIGHT + SBUTTON_HEIGHT + 4*USERSPACEPADDINGY;
+			offset+= TEXT_HEIGHT + SBUTTON_HEIGHT + 3*USERSPACEPADDINGY;
 			x0 = USERSPACEPADDINGX;
 			y0 = USERSPACEPADDINGY + offset;
-			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_HCENTER,0,0,"Attenuation");
+			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_VCENTER,0,0,"Attenuation");
 			x0 = x0;
 			y0 = USERSPACEPADDINGY*2+TEXT_HEIGHT + offset;
 			hButton = BUTTON_CreateEx(x0,y0,SBUTTON_WIDTH,SBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_ATT1);
@@ -317,6 +305,20 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 			BUTTON_SetText(hButton,"1:10");
 			WM_DisableWindow(hButton);
 			
+			// Gain Up/Down buttons
+			offset+= TEXT_HEIGHT + SBUTTON_HEIGHT + 3*USERSPACEPADDINGY;
+			x0 = USERSPACEPADDINGX;
+			y0 = USERSPACEPADDINGY + offset;
+			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_VCENTER,0,0,"Gain");
+			x0 = x0;
+			y0 += USERSPACEPADDINGY+TEXT_HEIGHT;
+			hButton = BUTTON_CreateEx(x0,y0,BBUTTON_WIDTH,2*BBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_GAINUP);
+			BUTTON_SetText(hButton,"Up");
+			x0 = x0;
+			y0 += 2*BBUTTON_HEIGHT + USERSPACEPADDINGY;
+			hButton = BUTTON_CreateEx(x0,y0,BBUTTON_WIDTH,2*BBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_GAINDOWN);
+			BUTTON_SetText(hButton,"Down");
+			
 		}break;
 		case WM_NOTIFY_PARENT:
 		{
@@ -326,6 +328,7 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 			{
 				case WM_NOTIFICATION_CLICKED: // Intentionaly it is not WM_NOTIFICATION_RELEASED
 				{
+					GUI_Delay(10);
 					if( Id == GUI_ID_USERSPACE_AC )
 					{
 						hButton = WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_AC);
@@ -373,6 +376,26 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 						hButton = WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_ATT10);
 						WM_DisableWindow(hButton);
 						Relay_Attenuator(DB20);
+					}
+					if( Id == GUI_ID_USERSPACE_GAINUP )
+					{
+						if( VGA_Step_Gain(STEP_UP) != 0 )
+							WM_DisableWindow(WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_GAINUP));
+						else
+						{
+							WM_EnableWindow(WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_GAINDOWN));
+							WM_EnableWindow(WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_GAINUP));
+						}
+					}
+					if( Id == GUI_ID_USERSPACE_GAINDOWN )
+					{
+						if( VGA_Step_Gain(STEP_DOWN) )
+							WM_DisableWindow(WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_GAINDOWN));
+						else
+						{
+							WM_EnableWindow(WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_GAINDOWN));
+							WM_EnableWindow(WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_GAINUP));
+						}
 					}
 				}break;
 		}break;
