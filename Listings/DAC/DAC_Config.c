@@ -17,14 +17,17 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "DAC_Config.h"
+#include "Error_Handler.h"
 #include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static uint8_t u8_txBuffer[3];
-static uint8_t u8_CurrentValue=0;
+static DACTXBUFFER _CurrentState;
+int16_t _CurrentOutVoltage;
 extern SPI_HandleTypeDef g_hSpi;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -44,7 +47,11 @@ HAL_StatusTypeDef DAC_Init(void)
 		GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
 		HAL_GPIO_Init(DAC_SPIx_CS_GPIO_PORT,&GPIO_InitStructure);
 		HAL_GPIO_WritePin(DAC_SPIx_CS_GPIO_PORT,DAC_SPIx_CS_PIN,GPIO_PIN_SET);
-		errCode=HAL_OK;
+		
+		memset((void*)&_CurrentState.buffer,0,sizeof(_CurrentState.buffer));	// Clear. NECESSARY!!
+		_CurrentState.DataFields.power = 0x0;
+		_CurrentState.DataFields.value = 0x0000;
+		errCode = DAC_Transmit();
 	}
 	else
 	{
@@ -60,37 +67,51 @@ HAL_StatusTypeDef DAC_DeInit(void)
 	return HAL_OK;
 }
 
-HAL_StatusTypeDef Set_DAC_Power_Mode(DAC_POWER_MODE a_PowerMode)
+HAL_StatusTypeDef DAC_Set_Power_Mode(DAC_POWER_MODE a_PowerMode)
 {
 	HAL_StatusTypeDef errCode=HAL_OK;
 	switch(a_PowerMode)
 	{
 		case POWER_DOWN:
 		{
-			/**/
+		_CurrentState.DataFields.power = 0x3;
 		}break;
 		case POWER_FULL:
 		{
-			/**/
+		_CurrentState.DataFields.power = 0x0;
 		}break;
 		default:
 		{
 			/**/
 		}
 	}
+	errCode = DAC_Transmit();
 	return errCode;
 }
 
-HAL_StatusTypeDef Set_DAC_Output(uint8_t a_8u_voltage)
+HAL_StatusTypeDef DAC_Set_Voltage(uint8_t a_8u_voltage)
 {
-	// TODO: Implement
-	u8_CurrentValue = a_8u_voltage;
+	//_CurrentOutValue = a_8u_voltage;
+	
 	return HAL_ERROR;
 }
 
-uint8_t Get_DAC_Output(void)
+HAL_StatusTypeDef DAC_Set_Value(uint16_t a_16u_value)
 {
-	return u8_CurrentValue;
+	HAL_StatusTypeDef errCode=HAL_OK;
+	_CurrentState.DataFields.value = a_16u_value;
+	errCode = DAC_Transmit();
+	return errCode;
+}
+
+uint8_t Get_DAC_Voltage(void)
+{
+	return _CurrentOutVoltage;
+}
+
+uint16_t Get_DAC_Value(void)
+{
+	return _CurrentState.DataFields.value;
 }
 
 DAC_POWER_MODE Get_DAC_Power_Mode(void)
@@ -98,15 +119,32 @@ DAC_POWER_MODE Get_DAC_Power_Mode(void)
 	return POWER_FULL;
 }
 
-static HAL_StatusTypeDef DAC_Transmit(uint8_t*  a_p8u_Data)
+static HAL_StatusTypeDef DAC_Transmit()
 {
 	HAL_StatusTypeDef errCode=HAL_OK;
+	uint8_t Data[4];
+	
+	// Reorganize data
+	Data[0] = _CurrentState.buffer[2];
+	Data[1] = _CurrentState.buffer[0];
+	Data[2] = 0x00;
+	Data[3] = _CurrentState.buffer[1];
+	
 	if( HAL_SPI_GetState(&g_hSpi) != HAL_SPI_STATE_RESET )// If SPI initialized
 	{
+		SPI_NSS_DeInit();
 		DAC_CS_Write(FALSE);
-		errCode = HAL_SPI_Transmit_DMA(&g_hSpi,a_p8u_Data,BUFFERSIZE(a_p8u_Data));
+		if( SPI_DMA )
+		{
+			errCode = HAL_SPI_Transmit_DMA(&g_hSpi,Data,2);
+		}
+		else
+		{
+			errCode = HAL_SPI_Transmit_IT(&g_hSpi,Data,2);
+		}
 		while(HAL_SPI_GetState(&g_hSpi) == HAL_SPI_STATE_BUSY_TX ) {}
 		DAC_CS_Write(TRUE);
+		SPI_NSS_Init();
 	}
 	else
 	{

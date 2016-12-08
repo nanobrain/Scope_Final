@@ -26,7 +26,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static TXBUFFER _CurrentState;
+static VGATXBUFFER _CurrentState;
 VGA_GAIN _CurrentGain;
 extern SPI_HandleTypeDef g_hSpi;
 
@@ -47,11 +47,11 @@ HAL_StatusTypeDef VGA_Init(void)
 		HAL_GPIO_Init(VGA_SPIx_CS_GPIO_PORT,&GPIO_InitStructure);
 		HAL_GPIO_WritePin(VGA_SPIx_CS_GPIO_PORT,VGA_SPIx_CS_PIN,GPIO_PIN_SET);
 		
-		memset((void*)&_CurrentState.buffer,0,sizeof(_CurrentState.buffer));	// Clear. NECESSARY!!
-		_CurrentState.fields.power 	= 0x1;		// Aux Hi-Z
-		_CurrentState.fields.filter = 0x1;		// Lowest filter (20 MHz)
-		_CurrentState.fields.ladder = 0x9;		// Lowest gain
-		_CurrentState.fields.preAmp = 0x0;		// Lowest gain
+		memset((void*)_CurrentState.buffer,0,sizeof(_CurrentState.buffer));	// Clear. NECESSARY!!
+		_CurrentState.DataFields.power 	= 0x1;		// Aux Hi-Z
+		_CurrentState.DataFields.filter = 0x1;		// Lowest filter (20 MHz)
+		_CurrentState.DataFields.ladder = 0x9;		// Lowest gain
+		_CurrentState.DataFields.preAmp = 0x0;		// Lowest gain
 		_CurrentGain = DB0_84;
 		
 		errCode = VGA_Transmit();
@@ -114,18 +114,18 @@ void VGA_Set_Gain(VGA_GAIN a_gain)
 	// Calculate enum value
 	if( a_gain > DB18_84 )
 	{
-		_CurrentState.fields.preAmp = 0x1;
-		_CurrentState.fields.ladder = (20UL - a_gain)&0xF;
+		_CurrentState.DataFields.preAmp = 0x1;
+		_CurrentState.DataFields.ladder = (20UL - a_gain)&0xF;
 	}
 	else if( a_gain == DB18_84 )
 	{
-		_CurrentState.fields.preAmp = 0x1;
-		_CurrentState.fields.ladder = (10UL - a_gain)&0xF;
+		_CurrentState.DataFields.preAmp = 0x1;
+		_CurrentState.DataFields.ladder = (10UL - a_gain)&0xF;
 	}
 	else if( a_gain < DB18_84 )
 	{
-		_CurrentState.fields.preAmp = 0x0;
-		_CurrentState.fields.ladder = (10UL - a_gain)&0xF;
+		_CurrentState.DataFields.preAmp = 0x0;
+		_CurrentState.DataFields.ladder = (10UL - a_gain)&0xF;
 	}
 	else
 		Error_Handler(ERROR_TRANSMIT);
@@ -143,16 +143,16 @@ VGA_GAIN VGA_Get_Gain(void)
 	VGA_GAIN curGain;
 	
 	// Calculate enum value
-	if( _CurrentState.fields.preAmp == 1 )
+	if( _CurrentState.DataFields.preAmp == 1 )
 	{
-		if( (unsigned long)_CurrentState.fields.ladder == 0)
+		if( (unsigned long)_CurrentState.DataFields.ladder == 0)
 			curGain = DB18_84;
 		else
-			curGain =(VGA_GAIN)(20UL - (unsigned long)_CurrentState.fields.ladder);
+			curGain =(VGA_GAIN)(20UL - (unsigned long)_CurrentState.DataFields.ladder);
 	}
-	else if( _CurrentState.fields.preAmp == 0 )
+	else if( _CurrentState.DataFields.preAmp == 0 )
 	{
-		curGain = (VGA_GAIN)(10UL - (unsigned long)_CurrentState.fields.ladder);
+		curGain = (VGA_GAIN)(10UL - (unsigned long)_CurrentState.DataFields.ladder);
 	}
 	else
 		Error_Handler(ERROR_TRANSMIT);
@@ -173,19 +173,11 @@ static HAL_StatusTypeDef VGA_Transmit(void)
 		SPI_NSS_DeInit();
 		VGA_CS_Write(FALSE);
 		
-		//Set command to Write
+		//Set command to Write and reorganize data
 		Data[0] = _CurrentState.buffer[1];
-		Data[1] = 0;
-		Data[2] = 0;
+		Data[1] = 0; // WRITE command
+		Data[2] = 0; // Just padding
 		Data[3] = _CurrentState.buffer[0];
-		
-		/*
-		buffer |= (_CurrentState.fields.command	<< 16)&0xFF;
-		buffer |= (_CurrentState.fields.power		<< 10)&0x1;
-		buffer |= (_CurrentState.fields.filter	<< 8)&0x7;
-		buffer |= (_CurrentState.fields.preAmp	<< 4)&0x1;
-		buffer |= (_CurrentState.fields.ladder			)&0xF;
-		*/
 		
 		if( SPI_DMA )
 		{
@@ -212,10 +204,7 @@ static HAL_StatusTypeDef VGA_Transmit(void)
 
 static void VGA_CS_Write(LOGIC a_SetReset)
 {
-	if( a_SetReset == TRUE )
-		HAL_GPIO_WritePin(VGA_SPIx_CS_GPIO_PORT,VGA_SPIx_CS_PIN,GPIO_PIN_SET);
-	else
-		HAL_GPIO_WritePin(VGA_SPIx_CS_GPIO_PORT,VGA_SPIx_CS_PIN,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(VGA_SPIx_CS_GPIO_PORT,VGA_SPIx_CS_PIN,(a_SetReset ? GPIO_PIN_SET : GPIO_PIN_RESET));
 }
 
 /**** END OF FILE ****/

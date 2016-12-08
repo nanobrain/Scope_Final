@@ -13,7 +13,20 @@
 #define __DAC_CONFIG_H
 
 /* Includes ------------------------------------------------------------------*/
+
 /* Exported types ------------------------------------------------------------*/
+typedef struct DACDataField{
+	int /*NULL*/	:6;
+	int power 		:2;
+	int	value			:16;
+// Bits:				24
+} /* __attribute__ ((__packed__)) __attribute__ ((aligned(32)))*/ DACDataField;
+
+typedef union DACTXBUFFER {
+	DACDataField DataFields;
+	uint8_t	buffer[3];
+} /* __attribute__ ((__packed__)) __attribute__ ((aligned(32)))*/ DACTXBUFFER;
+
 typedef enum DAC_POWER_MODE{
 	POWER_DOWN,
 	POWER_FULL
@@ -28,12 +41,16 @@ typedef enum DAC_POWER_MODE{
 /* Exported macro ------------------------------------------------------------*/
 /* Functions ------------------------------------------------------- */
 static void DAC_CS_Write(LOGIC a_State);
-static HAL_StatusTypeDef DAC_Transmit(uint8_t*  a_p8u_Data);
-HAL_StatusTypeDef Set_DAC_Output(uint8_t a_8u_voltage);
-uint8_t Get_DAC_Output(void);
-HAL_StatusTypeDef Set_DAC_Power_Mode(DAC_POWER_MODE a_PowerMode);
+static HAL_StatusTypeDef DAC_Transmit(void);
 HAL_StatusTypeDef DAC_Init(void);
 HAL_StatusTypeDef DAC_DeInit(void);
+HAL_StatusTypeDef DAC_Set_Power_Mode(DAC_POWER_MODE a_PowerMode);
+HAL_StatusTypeDef DAC_Set_Value(uint16_t a_16u_value);
+HAL_StatusTypeDef DAC_Set_Voltage(uint8_t a_8u_voltage);
+uint8_t Get_DAC_Voltage(void);
+uint16_t Get_DAC_Value(void);
+DAC_POWER_MODE Get_DAC_Power_Mode(void);
+
 
 #endif /* __DAC_CONFIG_H */
 

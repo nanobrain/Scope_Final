@@ -132,12 +132,12 @@
             <UseExternalTool>0</UseExternalTool>
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
-            <Capability>0</Capability>
-            <DriverSelection>-1</DriverSelection>
+            <Capability>1</Capability>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>OS_STKCHECK</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Listings;.\Listings\ADC;.\Listings\RTOS;.\Listings\DAC;.\Listings\SPI;.\Listings\Leds;.\Listings\Relays;.\Listings\Utils;.\Listings\Main;.\Listings\Data_Processing;.\Listings\GUI</IncludePath>
+              <IncludePath>.\Listings;.\Listings\ADC;.\Listings\RTOS;.\Listings\SPI;.\Listings\Leds;.\Listings\Relays;.\Listings\Utils;.\Listings\Main;.\Listings\Data_Processing;.\Listings\GUI;.\Listings\VGA;.\Listings\DAC</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

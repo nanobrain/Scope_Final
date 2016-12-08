@@ -14,7 +14,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
-typedef struct DataField{
+typedef struct VGADataField{
 	int ladder 		:4;
 	int preAmp		:1;
 	int /*NULL*/	:1;
@@ -22,13 +22,13 @@ typedef struct DataField{
 	int /*NULL*/	:1;
 	int power			:1;
 	int /*NULL*/	:5;
-// Bits:				32
-} /* __attribute__ ((__packed__)) __attribute__ ((aligned(32)))*/ DataField;
+// Bits:				24
+} /* __attribute__ ((__packed__)) __attribute__ ((aligned(32)))*/ VGADataField;
 
-typedef union TXBUFFER {
-	DataField fields;
+typedef union VGATXBUFFER {
+	VGADataField DataFields;
 	uint8_t	buffer[2];
-}/* __attribute__ ((__packed__)) __attribute__ ((aligned(32)))*/ TXBUFFER;
+} /* __attribute__ ((__packed__)) __attribute__ ((aligned(32)))*/ VGATXBUFFER;
 
 typedef enum VGA_BW_FILTER{
 	FULL_BW,

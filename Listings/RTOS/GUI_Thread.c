@@ -30,6 +30,7 @@
 #include "Trigger_Line.h"
 #include "ADC_Config.h"
 #include "VGA_Config.h"
+#include "DAC_Config.h"
 #include "Relays.h"
 #include "Leds.h"
 #include "Threads.h"
@@ -47,7 +48,7 @@
 /* Screen & windows sizes */
 // Scope graph
 #define GRIDLS						GUI_LS_DOT
-#define GRAPHCOUNTX 			12
+#define GRAPHCOUNTX 			10
 #define GRAPHCOUNTY				8
 #define GRAPHUNITSIZE			34
 #define GRAPHSIZEX				GRAPHCOUNTX*GRAPHUNITSIZE
@@ -64,17 +65,17 @@
 #define USERSPACESTARTY		GRAPHSTARTY
 #define USERSPACEENDX			SCREENSIZEX
 #define USERSPACEENDY			SCREENSIZEY
-#define USERSPACESIZEX		72//USERSPACEENDX - USERSPACESTARTX
+#define USERSPACESIZEX		SCREENSIZEX - GRAPHSIZEX // Better is USERSPACEENDX-USERSPACESTARTX, but it doesn't work. Dunno why...
 #define USERSPACESIZEY		USERSPACEENDY - USERSPACESTARTY
 #define USERSPACEPADDINGX	5
 #define USERSPACEPADDINGY	5
 
 // Small button
-#define SBUTTON_WIDTH				(USERSPACESIZEX - USERSPACEPADDINGX * 3) / 2
+#define SBUTTON_WIDTH				(GRAPHUNITSIZE*2 - USERSPACEPADDINGX * 3) / 2
 #define SBUTTON_HEIGHT			20
 
 // Big button
-#define BBUTTON_WIDTH				USERSPACESIZEX - USERSPACEPADDINGX * 2
+#define BBUTTON_WIDTH				GRAPHUNITSIZE*2 - USERSPACEPADDINGX * 2
 #define BBUTTON_HEIGHT			20
 
 // Text
@@ -92,6 +93,7 @@
 #define GUI_ID_USERSPACE_ATT10					GUI_ID_USER + 8
 #define GUI_ID_USERSPACE_GAINUP					GUI_ID_USER + 9
 #define GUI_ID_USERSPACE_GAINDOWN				GUI_ID_USER + 10
+#define GUI_ID_MAIN_OFFSET							GUI_ID_USER + 11
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -110,7 +112,7 @@ static const GUI_WIDGET_CREATE_INFO _aMainWindowCreate[] = {
 
 static const GUI_WIDGET_CREATE_INFO _aUserSpaceWindowCreate[] = {
 	{ WINDOW_CreateIndirect, "User_Space", GUI_ID_USERSPACE, USERSPACESTARTX, USERSPACESTARTY, USERSPACESIZEX, USERSPACESIZEY },
-	};
+};
 
 // Colors to be used in graph window
 typedef struct GUI_Colors{
@@ -138,9 +140,8 @@ int Init_GUIThread (void) {
 }
 
 void GUIThread (void const *argument) {
-	WM_HWIN hDlg,hTriggerLine,hGraph,hUserSpace;
-	uint16_t i,triggerVal;
-	char acExtraBytes[20] = "";
+	WM_HWIN 			hDlg, hTriggerLine;
+	uint16_t 			i, triggerVal;
 	
 	/* Define GUI colors */
 	_GuiColors.BackGround 			= GUI_WHITE;
@@ -152,11 +153,12 @@ void GUIThread (void const *argument) {
 	_GuiColors.Waveform					= GUI_GREEN;
 	
 	WM_SetCreateFlags(WM_CF_MEMDEV);
+	/* Create graph window */
 	hDlg = GUI_CreateDialogBox(_aMainWindowCreate,GUI_COUNTOF(_aMainWindowCreate),_GraphCallback,0,0,0);
-	//hGraph = WM_GetDialogItem(hDlg, GUI_ID_MAIN_SCOPE_GRAPH);
-	hUserSpace = GUI_CreateDialogBox(_aUserSpaceWindowCreate, GUI_COUNTOF(_aUserSpaceWindowCreate),_UserSpaceCallback,0,0,0);
-	hTriggerLine = Trigger_Line_Create(GRAPHSTARTX,(GRAPHSIZEY-GRAPHUNITSIZE)/2,GRAPHSIZEX,GRAPHUNITSIZE, NULL, WM_CF_SHOW | WM_CF_MOTION_Y, NULL, _cbTriggerLine, strlen(acExtraBytes));
-	Trigger_Line_SetUserData(hTriggerLine, acExtraBytes,strlen(acExtraBytes));
+	/* Create userspace window */
+	GUI_CreateDialogBox(_aUserSpaceWindowCreate, GUI_COUNTOF(_aUserSpaceWindowCreate),_UserSpaceCallback,0,0,0);
+	/* Create Trigger line window */
+	hTriggerLine = Trigger_Line_Create(GRAPHSTARTX,(GRAPHSIZEY-GRAPHUNITSIZE)/2,GRAPHSIZEX,GRAPHUNITSIZE, NULL, WM_CF_SHOW | WM_CF_MOTION_Y, NULL, _cbTriggerLine, NULL);
 	WM_MOTION_Enable(1);
 	WM_SetHasTrans(hTriggerLine);
 	
@@ -164,7 +166,6 @@ void GUIThread (void const *argument) {
 	osSignalSet(tid_Acqusition_Thread,sid_GuiInitialized);
 	
 	GUI_Clear();
-	GUI_CURSOR_Show();
 	
   while (1) {
 		osMutexWait(mid_Acquisition,osWaitForever);
@@ -212,32 +213,17 @@ static void _GraphCallback(WM_MESSAGE * pMsg) {
 			GRAPH_SetColor(hItem,_GuiColors.Frame,GRAPH_CI_FRAME);
 			GRAPH_SetColor(hItem,_GuiColors.Grid,GRAPH_CI_GRID);
 		} break;
-		/*case WM_NOTIFY_PARENT:
-		{
-			if (pMsg->Data.v == WM_NOTIFICATION_RELEASED)
-			{
-				int Id = WM_GetId(pMsg->hWinSrc);
-				switch(Id)
-				{
-					//case GUI_ID_MULTIPAGE_BT_ACD:
-					//	BUTTON_GetText( )
-					//break;
-				}
-			}
-		}break;*/
 		default:
     WM_DefaultProc(pMsg);
   }
 }
 
 static void _cbTriggerLine(WM_MESSAGE * pMsg) {
-  char acText[20] = { 0 };
 
   switch (pMsg->MsgId) {
   case WM_PAINT:
 	{
     Trigger_Line_Callback(pMsg);
-    Trigger_Line_GetUserData(pMsg->hWin, acText, sizeof(acText));
 		_TriggerPoint = WM_GetWindowOrgY(pMsg->hWin)+127;
 	}break;
   default:
@@ -247,79 +233,88 @@ static void _cbTriggerLine(WM_MESSAGE * pMsg) {
 
 static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 {
-  WM_HWIN							hDlg;
-	int 	          		NCode;
-  int									Id;
-	WM_HWIN							hButton;
-	uint8_t 						x0,y0,offset;
+  WM_HWIN											hDlg, hButton, hSlider;
+	int 	          						NCode, Id;
+	uint8_t 										x0, y0, offsetY, offsetX;
+	uint16_t										value;
 
   hDlg = pMsg->hWin;
   switch (pMsg->MsgId) {
 		case WM_INIT_DIALOG:
 		{
+			// Offset slider
+			hSlider = SLIDER_CreateEx(USERSPACEPADDINGX,USERSPACEPADDINGY,GRAPHUNITSIZE,USERSPACESIZEY,hDlg,WM_CF_SHOW,SLIDER_CF_VERTICAL,GUI_ID_MAIN_OFFSET);
+			SLIDER_SetRange(hSlider, 0, 655);
+			SLIDER_SetNumTicks(hSlider, 27);
+			SLIDER_SetValue(hSlider, 327); // Default position
+			
 			// ACDC text and buttons
-			offset=0;
-			x0 = USERSPACEPADDINGX;
+			offsetX = GRAPHUNITSIZE*2;
+			offsetY = 0;
+			x0 = USERSPACEPADDINGX + offsetX;
 			y0 = USERSPACEPADDINGY;
-			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_VCENTER,0,0,"Coupling");
+			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_HCENTER,0,0,"Coupling");
 			x0 = x0;
-			y0 = USERSPACEPADDINGY*2+TEXT_HEIGHT;
+			y0 = USERSPACEPADDINGY * 2 + TEXT_HEIGHT;
 			hButton = BUTTON_CreateEx(x0,y0,SBUTTON_WIDTH,SBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_AC);
 			BUTTON_SetText(hButton,"AC");
 			WM_EnableWindow(hButton);
-			x0 = USERSPACEPADDINGX*2+SBUTTON_WIDTH;
+			x0 += USERSPACEPADDINGX+SBUTTON_WIDTH;
 			y0 = y0;
 			hButton = BUTTON_CreateEx(x0,y0,SBUTTON_WIDTH,SBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_DC);
 			BUTTON_SetText(hButton,"DC");
 			WM_DisableWindow(hButton);
 			
 			// GND/IN text and buttons
-			offset+= TEXT_HEIGHT + SBUTTON_HEIGHT + 3*USERSPACEPADDINGY;
-			x0 = USERSPACEPADDINGX;
-			y0 = USERSPACEPADDINGY + offset;
-			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_VCENTER,0,0,"Input");
+			offsetX = offsetX;
+			offsetY += TEXT_HEIGHT + SBUTTON_HEIGHT + 3 * USERSPACEPADDINGY;
+			x0 = USERSPACEPADDINGX + offsetX;
+			y0 = USERSPACEPADDINGY + offsetY;
+			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_HCENTER,0,0,"Input");
 			x0 = x0;
-			y0 = USERSPACEPADDINGY*2+TEXT_HEIGHT + offset;
+			y0 = USERSPACEPADDINGY*2+TEXT_HEIGHT + offsetY;
 			hButton = BUTTON_CreateEx(x0,y0,SBUTTON_WIDTH,SBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_GND);
 			BUTTON_SetText(hButton,"GND");
 			WM_DisableWindow(hButton);
-			x0 = USERSPACEPADDINGX*2+SBUTTON_WIDTH;
+			x0 += USERSPACEPADDINGX+SBUTTON_WIDTH;
 			y0 = y0;
 			hButton = BUTTON_CreateEx(x0,y0,SBUTTON_WIDTH,SBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_IN);
 			BUTTON_SetText(hButton,"BNC");
 			WM_EnableWindow(hButton);
 			
 			// GND/IN text and buttons
-			offset+= TEXT_HEIGHT + SBUTTON_HEIGHT + 3*USERSPACEPADDINGY;
-			x0 = USERSPACEPADDINGX;
-			y0 = USERSPACEPADDINGY + offset;
-			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_VCENTER,0,0,"Attenuation");
+			offsetX = offsetX;
+			offsetY += TEXT_HEIGHT + SBUTTON_HEIGHT + 3 * USERSPACEPADDINGY;
+			x0 = USERSPACEPADDINGX + offsetX;
+			y0 = USERSPACEPADDINGY + offsetY;
+			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_HCENTER,0,0,"Attenuation");
 			x0 = x0;
-			y0 = USERSPACEPADDINGY*2+TEXT_HEIGHT + offset;
+			y0 = USERSPACEPADDINGY * 2 + TEXT_HEIGHT + offsetY;
 			hButton = BUTTON_CreateEx(x0,y0,SBUTTON_WIDTH,SBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_ATT1);
 			BUTTON_SetText(hButton,"1:1");
 			WM_EnableWindow(hButton);
-			x0 = USERSPACEPADDINGX*2+SBUTTON_WIDTH;
+			x0 += USERSPACEPADDINGX+SBUTTON_WIDTH;
 			y0 = y0;
 			hButton = BUTTON_CreateEx(x0,y0,SBUTTON_WIDTH,SBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_ATT10);
 			BUTTON_SetText(hButton,"1:10");
 			WM_DisableWindow(hButton);
 			
 			// Gain Up/Down buttons
-			offset+= TEXT_HEIGHT + SBUTTON_HEIGHT + 3*USERSPACEPADDINGY;
-			x0 = USERSPACEPADDINGX;
-			y0 = USERSPACEPADDINGY + offset;
-			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_VCENTER,0,0,"Gain");
+			offsetX = offsetX;
+			offsetY += TEXT_HEIGHT + SBUTTON_HEIGHT + 3*USERSPACEPADDINGY;
+			x0 = USERSPACEPADDINGX + offsetX;
+			y0 = USERSPACEPADDINGY + offsetY;
+			TEXT_CreateEx(x0,y0,USERSPACESIZEX,TEXT_HEIGHT,hDlg,WM_CF_SHOW | TEXT_CF_HCENTER,0,0,"Gain");
 			x0 = x0;
 			y0 += USERSPACEPADDINGY+TEXT_HEIGHT;
 			hButton = BUTTON_CreateEx(x0,y0,BBUTTON_WIDTH,2*BBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_GAINUP);
 			BUTTON_SetText(hButton,"Up");
 			x0 = x0;
-			y0 += 2*BBUTTON_HEIGHT + USERSPACEPADDINGY;
+			y0 += 2 * BBUTTON_HEIGHT + USERSPACEPADDINGY;
 			hButton = BUTTON_CreateEx(x0,y0,BBUTTON_WIDTH,2*BBUTTON_HEIGHT,hDlg, WM_CF_SHOW, 0, GUI_ID_USERSPACE_GAINDOWN);
 			BUTTON_SetText(hButton,"Down");
-			
-		}break;
+	
+		}break; // WM_INIT_DIALOG
 		case WM_NOTIFY_PARENT:
 		{
 			Id = WM_GetId(pMsg->hWinSrc);
@@ -328,7 +323,7 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 			{
 				case WM_NOTIFICATION_CLICKED: // Intentionaly it is not WM_NOTIFICATION_RELEASED
 				{
-					GUI_Delay(10);
+					osDelay(10);
 					if( Id == GUI_ID_USERSPACE_AC )
 					{
 						hButton = WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_AC);
@@ -397,10 +392,19 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 							WM_EnableWindow(WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_GAINUP));
 						}
 					}
-				}break;
-		}break;
+				}break;//case WM_NOTIFICATION_CLICKED
+				case WM_NOTIFICATION_VALUE_CHANGED:
+				{
+					if( Id == GUI_ID_MAIN_OFFSET )
+						{
+							hSlider = WM_GetDialogItem(hDlg,GUI_ID_MAIN_OFFSET);
+							value = (65535 - SLIDER_GetValue(hSlider))*100;
+							DAC_Set_Value(value);
+						}
+				}break;//case WM_NOTIFICATION_VALUE_CHANGED
+			} // switch(NCode)
+		}break; //case WM_NOTIFY_PARENT
 		default:
-    WM_DefaultProc(pMsg);
-  }
-}
-}
+		WM_DefaultProc(pMsg);
+	} // switch (pMsg->MsgId)
+} // END

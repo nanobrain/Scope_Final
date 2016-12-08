@@ -31,7 +31,7 @@ DMA_HandleTypeDef g_hSpiTxDma, g_hSpiRxDma;
 uint8_t g_aTxBuffer[20]="DUMMY";
 
 /* Private function prototypes -----------------------------------------------*/
-HAL_StatusTypeDef Init_spi();
+HAL_StatusTypeDef Init_spi(void);
 void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi);
 void HAL_SPI_MspDeInit(SPI_HandleTypeDef *hspi);
 void HAL_SPI_MspInit_IT(SPI_HandleTypeDef *hspi);
