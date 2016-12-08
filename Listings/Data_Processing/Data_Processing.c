@@ -8,8 +8,10 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
+#include "cmsis_os.h"                   // CMSIS RTOS header file
 #include "Main.h"
 #include "Data_Processing.h"
+#include "Threads.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -49,19 +51,19 @@ void Init_Memcp_DMA(uint16_t* a_Source,uint16_t* a_Destination, uint16_t a_Size)
 																																										// IN STM32F7 REFERENCE MANUAL
 }
 
-void minmax (uint16_t* a, uint16_t i, uint16_t j, uint16_t* min, uint16_t* max)
+void minmax (Data8* a, uint16_t i, uint16_t j, uint8_t* min, uint8_t* max)
 	{
-  uint16_t lmin, lmax, rmin, rmax, mid;
+  uint8_t lmin, lmax, rmin, rmax, mid;
   if (i == j) {
-    *min = a[i];
-    *max = a[j];
+    *min = a[i].payload;
+    *max = a[j].payload;
   } else if (j == i + 1) {
-    if (a[i] > a[j]) {
-      *min = a[j];
-      *max = a[i];
+    if (a[i].payload > a[j].payload) {
+      *min = a[j].payload;
+      *max = a[i].payload;
     } else {
-      *min = a[i];
-      *max = a[j];
+      *min = a[i].payload;
+      *max = a[j].payload;
     }
   } else {
     mid = (i + j) / 2;
@@ -72,17 +74,19 @@ void minmax (uint16_t* a, uint16_t i, uint16_t j, uint16_t* min, uint16_t* max)
   }
 }
 
-void Auto_Trigger()
+uint8_t Auto_Trigger(Data8* Signal, uint16_t Sig_Size)
 {
-	uint16_t min,max;
-	//osMutexWait(mid_Acquisition,osWaitForever);
+	uint8_t min,max;
+	uint8_t trigger;
+	osMutexWait(mid_Acquisition,osWaitForever);
 	/* Critical section */
 		{
-			//minmax(g_d8_RxBufferMain,0,BUFFERSIZE(g_d8_RxBufferMain),&min,&max);
-			//_TriggerPoint = max - min;
+			minmax(Signal,0,Sig_Size,&min,&max);
+			trigger = (max+min)/2;
 		}
 	/* END of critical section */
-	//osMutexRelease(mid_Acquisition);
+	osMutexRelease(mid_Acquisition);
+		return trigger;
 }
 
 uint16_t Trigger(uint8_t Trig_SP, volatile Data8* Signal, uint16_t Sig_Size ) // TODO: Try to use uint8_t address and increment it by 2 instead of using Data8.payload

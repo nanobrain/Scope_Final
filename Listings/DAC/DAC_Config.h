@@ -13,20 +13,7 @@
 #define __DAC_CONFIG_H
 
 /* Includes ------------------------------------------------------------------*/
-
 /* Exported types ------------------------------------------------------------*/
-typedef struct DACDataField{
-	int /*NULL*/	:6;
-	int power 		:2;
-	int	value			:16;
-// Bits:				24
-} /* __attribute__ ((__packed__)) __attribute__ ((aligned(32)))*/ DACDataField;
-
-typedef union DACTXBUFFER {
-	DACDataField DataFields;
-	uint8_t	buffer[3];
-} /* __attribute__ ((__packed__)) __attribute__ ((aligned(32)))*/ DACTXBUFFER;
-
 typedef enum DAC_POWER_MODE{
 	POWER_DOWN,
 	POWER_FULL
