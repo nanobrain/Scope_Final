@@ -59,7 +59,7 @@ typedef enum LOGIC{
 /* Exported constants --------------------------------------------------------*/
 #define SPI_DMA														0 // 1 -> Use DMA. 0 -> Use IT
 #define FAKE_WAVEFORM 										0	// 1 -> Use fake waveform. 0 -> Use real waveform from ADC
-#define RX_BUFFERCOUNT										900
+#define RX_BUFFERCOUNT										2048
 #define SDRAM_ADDRESS											0xC0200000
 #define GUI_BUFFER_ADDRESS 								0xC0200000
 #define GUI_NUMBYTES  										0x200000

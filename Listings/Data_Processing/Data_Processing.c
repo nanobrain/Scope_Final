@@ -74,14 +74,15 @@ void minmax (Data8* a, uint16_t i, uint16_t j, uint8_t* min, uint8_t* max)
   }
 }
 
-uint8_t Auto_Trigger(Data8* Signal, uint16_t Sig_Size)
+uint8_t Auto_Trigger(Data8* Signal, uint16_t Size)
 {
+	// NOT USED
 	uint8_t min,max;
 	uint8_t trigger;
 	osMutexWait(mid_Acquisition,osWaitForever);
 	/* Critical section */
 		{
-			minmax(Signal,0,Sig_Size,&min,&max);
+			minmax(Signal,0,Size,&min,&max);
 			trigger = (max+min)/2;
 		}
 	/* END of critical section */
@@ -89,41 +90,38 @@ uint8_t Auto_Trigger(Data8* Signal, uint16_t Sig_Size)
 		return trigger;
 }
 
-uint16_t Trigger(uint8_t Trig_SP, volatile Data8* Signal, uint16_t Sig_Size ) // TODO: Try to use uint8_t address and increment it by 2 instead of using Data8.payload
+uint16_t Trigger(uint8_t Trigger_Point, volatile Data8* Signal, uint16_t Size, uint16_t Offset, uint16_t Screen_Size )
 {
+	uint16_t i = 0;
+	uint16_t ctr = 0;
+	Size -= Screen_Size/2;
 
-	uint16_t i=0;
-	uint16_t ctr=0;
-	uint8_t offset = 50;
-	Sig_Size -=480;
-	
-	for(i=offset;i<=Sig_Size;i++) // Find first raising edge. Start from offset
+	for(i=Offset;i<=Size;i++) // Find first raising edge. Start from offset
 	{
-		if(Signal[i].payload >= Trig_SP)
+		if(Signal[i].payload <= Trigger_Point)// Signal is invertet, that's why there is '<='
 		{
 			ctr=i;
 			break;
 		}
 	}
 
-	for(i=ctr;i<=Sig_Size;i++) // Find falling edge
+	for(i=ctr;i<=Size;i++) // Find falling edge
 	{
-		if(Signal[i].payload < Trig_SP)
+		if(Signal[i].payload > Trigger_Point)
 		{
 			ctr=i;
 			break;
 		}
 	}
-	
-	for(i=ctr;i<=Sig_Size;i++) // Find second raising edge
+
+	for(i=ctr;i<=Size;i++) // Find second raising edge
 	{
-		if(Signal[i].payload >= Trig_SP)
+		if(Signal[i].payload <= Trigger_Point)
 		{
-			return i;
+			return i - Screen_Size/2;
 		}
 	}
 
-	return offset;
+	return Offset;
 }
-
 /**** END OF FILE ****/

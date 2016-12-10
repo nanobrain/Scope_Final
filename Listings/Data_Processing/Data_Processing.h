@@ -60,8 +60,8 @@ typedef union VGATXBUFFER {
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 void minmax (Data8* a, uint16_t i, uint16_t j, uint8_t* min, uint8_t* max);
-uint8_t Auto_Trigger(Data8* Signal, uint16_t Sig_Size);
-uint16_t Trigger(uint8_t Trig_SP, volatile Data8* Signal, uint16_t Sig_Size );
+uint8_t Auto_Trigger(Data8* Signal, uint16_t Size);
+uint16_t Trigger(uint8_t Trigger_Point, volatile Data8* Signal, uint16_t Size, uint16_t Offset, uint16_t Screen_Size );
 
 #endif /* __DATA_PROCESSING_H */
 

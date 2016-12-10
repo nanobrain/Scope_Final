@@ -71,11 +71,11 @@
 #define USERSPACEPADDINGY	5
 
 // Small button
-#define SBUTTON_WIDTH				(GRAPHUNITSIZE*2 - USERSPACEPADDINGX * 3) / 2
+#define SBUTTON_WIDTH				(GRAPHUNITSIZE*2.5 - USERSPACEPADDINGX * 3) / 2
 #define SBUTTON_HEIGHT			20
 
 // Big button
-#define BBUTTON_WIDTH				GRAPHUNITSIZE*2 - USERSPACEPADDINGX * 2
+#define BBUTTON_WIDTH				GRAPHUNITSIZE*2.5 - USERSPACEPADDINGX * 2
 #define BBUTTON_HEIGHT			20
 
 // Text
@@ -173,10 +173,12 @@ void GUIThread (void const *argument) {
 		{
 			GRAPH_DATA_YT_Clear(_hGraphData);
 			
-			triggerVal = Trigger(_TriggerPoint,g_d8_RxBufferMain1,RX_BUFFERCOUNT);
+			// uint16_t Trigger(uint8_t Trigger_Point, volatile Data8* Signal, uint16_t Size, uint16_t Offset, uint16_t Screen_Size )
+			
+			triggerVal = Trigger(_TriggerPoint, g_d8_RxBufferMain1, RX_BUFFERCOUNT, RX_BUFFERCOUNT/2-200, GRAPHSIZEX);
 			for(i=triggerVal;i<GRAPHSIZEX+triggerVal;i++)
 			{
-				GRAPH_DATA_YT_AddValue(_hGraphData,(short)(255 - g_d8_RxBufferMain1[i].payload + 127));
+				GRAPH_DATA_YT_AddValue(_hGraphData,(short)((255 - g_d8_RxBufferMain1[i].payload) + 127));
 			}
 		}
 		/* END of critical section */
@@ -249,7 +251,7 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 			SLIDER_SetValue(hSlider, 327); // Default position
 			
 			// ACDC text and buttons
-			offsetX = GRAPHUNITSIZE*2;
+			offsetX = GRAPHUNITSIZE*1.5;
 			offsetY = 0;
 			x0 = USERSPACEPADDINGX + offsetX;
 			y0 = USERSPACEPADDINGY;
