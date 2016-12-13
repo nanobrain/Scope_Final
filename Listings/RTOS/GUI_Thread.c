@@ -11,13 +11,7 @@
 /*----------------------------------------------------------------------------
  *      GUIThread: GUI Thread for Single-Task Execution Model
  *---------------------------------------------------------------------------*/
-
-/************** Screen config ****************/
-/*********************************************/
-/********** Grid  Graph	 Status bar **********/
-/********** 8x10 340x272   120x272  **********/
-/*********************************************/
-
+ 
 /* Includes ------------------------------------------------------------------*/
 #include "cmsis_os.h"                   // CMSIS RTOS header file
 #include "GUI.h"
@@ -129,7 +123,7 @@ static GUI_Colors _GuiColors;
 /* Private function prototypes -----------------------------------------------*/
 static void _GraphCallback(WM_MESSAGE * pMsg);
 static void _UserSpaceCallback(WM_MESSAGE * pMsg);
-static void _cbTriggerLine(WM_MESSAGE * pMsg);
+static void _TriggerLineCallback(WM_MESSAGE * pMsg);
 
 int Init_GUIThread (void) {
 
@@ -143,22 +137,13 @@ void GUIThread (void const *argument) {
 	WM_HWIN 			hDlg, hTriggerLine;
 	uint16_t 			i, triggerVal;
 	
-	/* Define GUI colors */
-	_GuiColors.BackGround 			= GUI_WHITE;
-	_GuiColors.Border 					= GUI_DARKBLUE;
-	_GuiColors.Frame 						= GUI_BLACK;
-	_GuiColors.GraphBackGround 	= GUI_BLACK;
-	_GuiColors.Grid 						= GUI_GRAY;
-	_GuiColors.Label 						= GUI_WHITE;
-	_GuiColors.Waveform					= GUI_GREEN;
-	
 	WM_SetCreateFlags(WM_CF_MEMDEV);
 	/* Create graph window */
 	hDlg = GUI_CreateDialogBox(_aMainWindowCreate,GUI_COUNTOF(_aMainWindowCreate),_GraphCallback,0,0,0);
 	/* Create userspace window */
 	GUI_CreateDialogBox(_aUserSpaceWindowCreate, GUI_COUNTOF(_aUserSpaceWindowCreate),_UserSpaceCallback,0,0,0);
 	/* Create Trigger line window */
-	hTriggerLine = Trigger_Line_Create(GRAPHSTARTX,(GRAPHSIZEY-GRAPHUNITSIZE)/2,GRAPHSIZEX,GRAPHUNITSIZE, NULL, WM_CF_SHOW | WM_CF_MOTION_Y, NULL, _cbTriggerLine, NULL);
+	hTriggerLine = Trigger_Line_Create(GRAPHSTARTX,(GRAPHSIZEY-GRAPHUNITSIZE)/2,GRAPHSIZEX,GRAPHUNITSIZE, NULL, WM_CF_SHOW | WM_CF_MOTION_Y, NULL, _TriggerLineCallback, NULL);
 	WM_MOTION_Enable(1);
 	WM_SetHasTrans(hTriggerLine);
 	
@@ -173,12 +158,11 @@ void GUIThread (void const *argument) {
 		{
 			GRAPH_DATA_YT_Clear(_hGraphData);
 			
-			// uint16_t Trigger(uint8_t Trigger_Point, volatile Data8* Signal, uint16_t Size, uint16_t Offset, uint16_t Screen_Size )
-			
 			triggerVal = Trigger(_TriggerPoint, g_d8_RxBufferMain1, RX_BUFFERCOUNT, RX_BUFFERCOUNT/2-200, GRAPHSIZEX);
+			
 			for(i=triggerVal;i<GRAPHSIZEX+triggerVal;i++)
 			{
-				GRAPH_DATA_YT_AddValue(_hGraphData,(short)((255 - g_d8_RxBufferMain1[i].payload) + 127));
+				GRAPH_DATA_YT_AddValue(_hGraphData,(short)((255 - g_d8_RxBufferMain1[i].payload) + 128));
 			}
 		}
 		/* END of critical section */
@@ -198,11 +182,19 @@ static void _GraphCallback(WM_MESSAGE * pMsg) {
   switch (pMsg->MsgId) {
 		case WM_INIT_DIALOG:
 		{
+			/* Define GUI colors */
+			_GuiColors.BackGround 			= GUI_WHITE;
+			_GuiColors.Border 					= GUI_DARKBLUE;
+			_GuiColors.Frame 						= GUI_BLACK;
+			_GuiColors.GraphBackGround 	= GUI_BLACK;
+			_GuiColors.Grid 						= GUI_GRAY;
+			_GuiColors.Label 						= GUI_WHITE;
+			_GuiColors.Waveform					= GUI_GREEN;
+			/* Configure window */
 			hItem = WM_GetDialogItem(hDlg, GUI_ID_MAIN_SCOPE_GRAPH);
 			_hGraphData = GRAPH_DATA_YT_Create(_GuiColors.Waveform, SCREENSIZEX, 0, 0);
 			GRAPH_AttachData(hItem,_hGraphData);
 			GRAPH_DATA_YT_SetAlign(_hGraphData,GRAPH_ALIGN_LEFT);
-			//GRAPH_SetVSizeX(hItem,RX_BUFFERCOUNT-50);
 			GRAPH_SetBorder(hItem,1,1,1,1);
 			GRAPH_SetGridDistX(hItem, GRAPHUNITSIZE);
 			GRAPH_SetGridDistY(hItem, GRAPHUNITSIZE);
@@ -214,19 +206,21 @@ static void _GraphCallback(WM_MESSAGE * pMsg) {
 			GRAPH_SetColor(hItem,_GuiColors.Border,GRAPH_CI_BORDER);
 			GRAPH_SetColor(hItem,_GuiColors.Frame,GRAPH_CI_FRAME);
 			GRAPH_SetColor(hItem,_GuiColors.Grid,GRAPH_CI_GRID);
+			GUI_SetColor(_GuiColors.Border);
+			GUI_DrawRect(GRAPHSTARTX+1,GRAPHSTARTY+1,GRAPHENDX-1,GRAPHENDY-1);
 		} break;
 		default:
     WM_DefaultProc(pMsg);
   }
 }
 
-static void _cbTriggerLine(WM_MESSAGE * pMsg) {
+static void _TriggerLineCallback(WM_MESSAGE * pMsg) {
 
   switch (pMsg->MsgId) {
   case WM_PAINT:
 	{
     Trigger_Line_Callback(pMsg);
-		_TriggerPoint = WM_GetWindowOrgY(pMsg->hWin)+127;
+		_TriggerPoint = WM_GetWindowOrgY(pMsg->hWin)+128;
 	}break;
   default:
     Trigger_Line_Callback(pMsg);
@@ -325,7 +319,6 @@ static void _UserSpaceCallback(WM_MESSAGE * pMsg)
 			{
 				case WM_NOTIFICATION_CLICKED: // Intentionaly it is not WM_NOTIFICATION_RELEASED
 				{
-					osDelay(10);
 					if( Id == GUI_ID_USERSPACE_AC )
 					{
 						hButton = WM_GetDialogItem(hDlg,GUI_ID_USERSPACE_AC);
