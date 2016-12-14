@@ -8,12 +8,9 @@
   ******************************************************************************
   */
   
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __DAC_CONFIG_H
 #define __DAC_CONFIG_H
 
-/* Includes ------------------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
 typedef enum ERRCODE{
 	ERROR_INIT,
 	ERROR_CONVERSION,
@@ -26,12 +23,10 @@ typedef enum ERRCODE{
 	ERROR_DEBUGMON,
 	ERROR_HAL_INIT,
 	ERROR_GUI_INIT,
-	NMI_ERROR
+	ERROR_GUI,
+	ERROR_NMI
 }ERRCODE;
 
-/* Exported constants --------------------------------------------------------*/
-/* Exported macro ------------------------------------------------------------*/
-/* Functions ------------------------------------------------------- */
 void Error_Handler(ERRCODE a_errCode);
 
 #endif /* __DAC_CONFIG_H */

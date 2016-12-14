@@ -12,7 +12,6 @@
  *      Heart_Beat_Thread:  Status thread
  *---------------------------------------------------------------------------*/
  
-/* Includes ------------------------------------------------------------------*/
 #include "cmsis_os.h"                   // CMSIS RTOS header file
 #include "main.h"
 #include "Leds.h"
@@ -22,16 +21,10 @@
 #include "RTE_Components.h"             // Component selection
 #endif
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 // Threads items
 osThreadId tid_Heart_Beat_Thread;
 osThreadDef (Heart_Beat_Thread, TH_HEARTBEATPRIORITY, 1, TH_HEARTBEATSTACK);
 
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
 int Init_Heart_Beat_Thread (void) {
 
   tid_Heart_Beat_Thread = osThreadCreate (osThread(Heart_Beat_Thread), NULL);

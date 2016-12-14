@@ -8,12 +8,9 @@
   ******************************************************************************
   */
   
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __LEDS_CONFIG_H
 #define __LEDS_CONFIG_H
 
-/* Includes ------------------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
 typedef enum LEDS{
 	LEDRED1,
 	LEDRED2,
@@ -22,7 +19,6 @@ typedef enum LEDS{
 	LEDGREEN,
 }LEDS;
 
-/* Exported constants --------------------------------------------------------*/
 /* Definition for Pins */
 #define LEDRED1_PIN									GPIO_PIN_0
 #define LEDRED2_PIN									GPIO_PIN_10
@@ -42,8 +38,6 @@ typedef enum LEDS{
 #define LEDBLUE_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
 #define LEDGREEN_GPIO_CLK_ENABLE();		__HAL_RCC_GPIOF_CLK_ENABLE();
 
-/* Exported macro ------------------------------------------------------------*/
-/* Functions ------------------------------------------------------- */
 HAL_StatusTypeDef Leds_Init(void);
 HAL_StatusTypeDef Leds_DeInit(void);
 void Led(LEDS a_Led,uint8_t a_State);

@@ -37,77 +37,32 @@
   ******************************************************************************
   */
 
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "Error_Handler.h"
 #include "stm32f7xx_it.h"
 
-/** @addtogroup STM32F7xx_HAL_Examples
-  * @{
-  */
-
-/** @addtogroup SPI_FullDuplex_ComDMA
-  * @{
-  */
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 /* SPI handler declared in "main.c" file */
 extern SPI_HandleTypeDef g_hSpi;
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
 
 /******************************************************************************/
 /*            Cortex-M7 Processor Exceptions Handlers                         */
 /******************************************************************************/
 
-/**
-  * @brief   This function handles NMI exception.
-  * @param  None
-  * @retval None
-  */
 void NMI_Handler(void)
-{ Error_Handler(NMI_ERROR); }
+{ Error_Handler(ERROR_NMI); }
 
-/**
-  * @brief  This function handles Hard Fault exception.
-  * @param  None
-  * @retval None
-  */
 void HardFault_Handler(void)
 { Error_Handler(ERROR_HARDFAULT); }
 
-/**
-  * @brief  This function handles Memory Manage exception.
-  * @param  None
-  * @retval None
-  */
 void MemManage_Handler(void)
 { Error_Handler(ERROR_MEMMANAGE); }
 
-/**
-  * @brief  This function handles Bus Fault exception.
-  * @param  None
-  * @retval None
-  */
 void BusFault_Handler(void)
 { Error_Handler(ERROR_BUSFAULT); }
 
-/**
-  * @brief  This function handles Usage Fault exception.
-  * @param  None
-  * @retval None
-  */
 void UsageFault_Handler(void)
 { Error_Handler(ERROR_USAGEFAULT); }
 
-/**
-  * @brief  This function handles Debug Monitor exception.
-  * @param  None
-  * @retval None
-  */
 void DebugMon_Handler(void)
 { Error_Handler(ERROR_DEBUGMON); }
 
@@ -117,31 +72,17 @@ void DebugMon_Handler(void)
 /*  available peripheral interrupt handler's name please refer to the startup */
 /*  file (startup_stm32f7xx.s).                                               */
 /******************************************************************************/
-/**
-  * @brief  This function handles SPI interrupt request.
-  * @param  None
-  * @retval None
-  */
+
 void SPIx_IRQHandler(void)
 {
   HAL_SPI_IRQHandler(&g_hSpi);
 }
 
-/**
-  * @brief  This function handles DMA Rx interrupt request.
-  * @param  None
-  * @retval None
-  */
 void SPIx_DMA_RX_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(g_hSpi.hdmarx);
 }
 
-/**
-  * @brief  This function handles DMA Tx interrupt request.
-  * @param  None
-  * @retval None
-  */
 void SPIx_DMA_TX_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(g_hSpi.hdmatx);
@@ -183,21 +124,8 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
   UNUSED(hspi);
 }
 
-/**
-  * @brief  This function handles PPP interrupt request.
-  * @param  None
-  * @retval None
-  */
 /*void PPP_IRQHandler(void)
 {
 }*/
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

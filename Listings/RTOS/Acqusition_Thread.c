@@ -24,18 +24,12 @@
 #include "RTE_Components.h"             // Component selection
 #endif
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 // Threads items
 osThreadId tid_Acqusition_Thread;
 osMutexId mid_Acquisition;
 osThreadDef (Acqusition_Thread, TH_ACQUISITIONPRIORITY, 1, TH_ACQUISITIONSTACK);
 osMutexDef (m_Acquisition);
 
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
 int Init_Acqusition_Thread (void) {
 
 	mid_Acquisition = osMutexCreate (osMutex (m_Acquisition));

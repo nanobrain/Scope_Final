@@ -7,7 +7,8 @@
   * @brief   Custom widget for trigger line
   ******************************************************************************
   */
-/* Includes ------------------------------------------------------------------*/
+#include "cmsis_os.h"                   // CMSIS RTOS header file
+#include "main.h"
 #include "GUI.h"
 #include "HEADER.h"
 #include "FRAMEWIN.h"
@@ -15,15 +16,10 @@
 #include "Trigger_Line.h"
 #include <stdlib.h>
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
 #define TRANSPARENCY_LOW						(0x40uL << 24)
 #define TRANSPARENCY_MEDIUM					(0x80uL << 24)
 #define TRANSPARENCY_HIGH						(0xC0uL << 24)
 #define TRANSPARENCY_VERY_HIGH			(0xF0uL << 24)
-
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 
 const Trigger_Line_Obj Trigger_Line_Default = {
 	0, 							// Pressed
@@ -34,7 +30,6 @@ const Trigger_Line_Obj Trigger_Line_Default = {
 	0 							// NumExtraBytes
 };
 
-/* Private function prototypes -----------------------------------------------*/
 void Trigger_Line_Callback(WM_MESSAGE * pMsg) {
   Trigger_Line_Handle	hWin;
   GUI_PID_STATE*			pState;

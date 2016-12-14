@@ -8,17 +8,9 @@
   ******************************************************************************
   */
 
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "Leds.h"
 #include "Error_Handler.h"
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
 
 void Error_Handler(ERRCODE a_errCode)
 {
@@ -44,7 +36,7 @@ void Error_Handler(ERRCODE a_errCode)
 				Led(LEDBLUE,FALSE);
 				HAL_Delay(500);
 			}
-		}break;
+		}//break;
 		case ERROR_CONVERSION:
 		case ERROR_TRANSMIT:
 		{
@@ -64,7 +56,7 @@ void Error_Handler(ERRCODE a_errCode)
 				Led(LEDBLUE,FALSE);
 				HAL_Delay(500);
 			}
-		}break;
+		}//break;
 		case ERROR_GUI_INIT:
 		case ERROR_THREAD:
 		{
@@ -85,7 +77,7 @@ void Error_Handler(ERRCODE a_errCode)
 				Led(LEDBLUE,FALSE);
 				HAL_Delay(500);
 			}
-		}break;
+		}//break;
 		case ERROR_HARDFAULT:
 		{
 			while(1)
@@ -106,7 +98,7 @@ void Error_Handler(ERRCODE a_errCode)
 				Led(LEDBLUE,FALSE);
 				HAL_Delay(500);
 			}
-		}break;
+		}//break;
 		case ERROR_HAL_INIT:
 		{
 			while(1)
@@ -136,7 +128,9 @@ void Error_Handler(ERRCODE a_errCode)
 				Led(LEDRED3,FALSE);
 				HAL_Delay(500);
 			}
-		}
+		}//break;
+		case ERROR_NMI:
+		case ERROR_GUI:
 		default:
 		{
 			while(1)
@@ -148,8 +142,6 @@ void Error_Handler(ERRCODE a_errCode)
 			}
 		}
 	}
-	
-	while(1){}
 }
 
 /**** END OF FILE ****/

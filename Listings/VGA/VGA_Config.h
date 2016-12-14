@@ -8,12 +8,9 @@
   ******************************************************************************
   */
   
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __VGA_CONFIG_H
 #define __VGA_CONFIG_H
 
-/* Includes ------------------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
 typedef enum VGA_BW_FILTER{
 	FULL_BW,
 	LP20MHZ,
@@ -58,13 +55,11 @@ typedef enum STEP_DIRECTION{
 	STEP_UP=1
 }STEP_DIRECTION;
 
-/* Exported constants --------------------------------------------------------*/
 /* Definition for SPIx Pins */
 #define VGA_SPIx_CS_PIN                     GPIO_PIN_4
 #define VGA_SPIx_CS_GPIO_PORT               GPIOB
 #define VGA_GPIO_CLK_ENABLE									__HAL_RCC_GPIOB_CLK_ENABLE
-/* Exported macro ------------------------------------------------------------*/
-/* Functions ------------------------------------------------------- */
+
 static void VGA_CS_Write(LOGIC a_SetReset);
 static HAL_StatusTypeDef VGA_Transmit(void);
 void VGA_Set_Gain(VGA_GAIN a_gain);

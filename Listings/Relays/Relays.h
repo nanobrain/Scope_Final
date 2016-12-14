@@ -8,12 +8,9 @@
   ******************************************************************************
   */
   
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __RELAY_CONFIG_H
 #define __RELAY_CONFIG_H
 
-/* Includes ------------------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
 typedef enum RELAY{
 	REL_GND,
 	REL_ATT,
@@ -35,7 +32,6 @@ typedef enum ATTENUATION{
 	DB20	
 }ATTENUATION;
 
-/* Exported constants --------------------------------------------------------*/
 /* Definition for Pins */
 #define REL_GND_PIN											GPIO_PIN_7
 #define REL_ATT_PIN											GPIO_PIN_0
@@ -47,8 +43,6 @@ typedef enum ATTENUATION{
 #define REL_ATT_GPIO_CLK_ENABLE					__HAL_RCC_GPIOI_CLK_ENABLE
 #define REL_ACDC_GPIO_CLK_ENABLE				__HAL_RCC_GPIOA_CLK_ENABLE
 
-/* Exported macro ------------------------------------------------------------*/
-/* Functions ------------------------------------------------------- */
 HAL_StatusTypeDef Relays_Init(void);
 HAL_StatusTypeDef Relays_DeInit(void);
 static void _Relay(RELAY a_Relay,LOGIC a_State);

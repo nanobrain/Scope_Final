@@ -21,16 +21,13 @@
 /* Channel 0 : Stream 4 */
 /************************/
 
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f7xx_hal_conf.h"
 #include <stdlib.h>
-/* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef g_hSpi;
 DMA_HandleTypeDef g_hSpiTxDma, g_hSpiRxDma;
 uint8_t g_aTxBuffer[20]="DUMMY";
 
-/* Private function prototypes -----------------------------------------------*/
 HAL_StatusTypeDef Init_spi(void);
 void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi);
 void HAL_SPI_MspDeInit(SPI_HandleTypeDef *hspi);

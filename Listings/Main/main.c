@@ -35,12 +35,6 @@
   ******************************************************************************
   */
 
-/*
- * This file contains modifications by ARM to provide it as User Code Template
- * within the STM32 Device Family Pack.
- */
-
-/* Includes ------------------------------------------------------------------*/
 #ifdef _RTE_
 #include "RTE_Components.h"             // Component selection
 #endif
@@ -65,12 +59,9 @@ uint32_t HAL_GetTick(void) {
   return os_time; 
 }
 #endif
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
+
 extern SPI_HandleTypeDef g_hSpi;
-/* Private function prototypes -----------------------------------------------*/
+
 // MPU Initialization
 static void SystemClock_Config(void);
 static void MPU_Config(void);
@@ -91,27 +82,13 @@ extern HAL_StatusTypeDef ADC_Receive(void);
 static void Demo_Run(void);
 static void Display_HelloMsg(void);
 
-/**
-  * @brief  Main program
-  * @param  None
-  * @retval None
-  */
 int main(void)
 {
-  /* This project template calls firstly two functions in order to configure MPU feature 
-     and to enable the CPU Cache, respectively MPU_Config() and CPU_CACHE_Enable().
-     These functions are provided as template implementation that User may integrate 
-     in his application, to enhance the performance in case of use of AXI interface 
-     with several masters. */ 
-  
-	/* Locals */
 	osThreadId tid_Main;
 	osStatus os_status;
 	
-  /* Configure the MPU attributes as Write Through */
   MPU_Config();
 
-  /* Enable the CPU Cache */
   CPU_CACHE_Enable();
 
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS
@@ -134,11 +111,8 @@ int main(void)
   /* Initialize */
 	System_Init();
 	
-	/* Initialize the Graphics Component */
 	GUI_Init();
-	/* Hello message */
 	Display_HelloMsg();
-	/* Test run */
 	Demo_Run();
 	
 #ifdef RTE_CMSIS_RTOS                   // when using CMSIS RTOS

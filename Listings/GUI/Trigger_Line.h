@@ -8,11 +8,9 @@
   ******************************************************************************
   */
   
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __TRIGGER_LINE_H
 #define __TRIGGER_LINE_H
 
-/* Private typedef -----------------------------------------------------------*/
 typedef WM_HMEM Trigger_Line_Handle;
 
 typedef struct {
@@ -24,10 +22,6 @@ typedef struct {
 	int 			NumExtraBytes;
 } Trigger_Line_Obj;
 
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
 void Trigger_Line_Callback(WM_MESSAGE* pMsg);
 int Trigger_Line_GetUserData(Trigger_Line_Handle hWin, void * pDest, int SizeOfBuffer);
 int Trigger_Line_SetUserData(Trigger_Line_Handle hWin, void * pSrc,  int SizeOfBuffer);

@@ -13,12 +13,7 @@
 #include "Data_Processing.h"
 #include "Threads.h"
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 DMA_HandleTypeDef g_hMemcpDma;
-/* Private function prototypes -----------------------------------------------*/
 
 void Init_Memcp_DMA(uint16_t* a_Source,uint16_t* a_Destination, uint16_t a_Size)
 {
@@ -51,7 +46,7 @@ void Init_Memcp_DMA(uint16_t* a_Source,uint16_t* a_Destination, uint16_t a_Size)
 																																										// IN STM32F7 REFERENCE MANUAL
 }
 
-void minmax (Data8* a, uint16_t i, uint16_t j, uint8_t* min, uint8_t* max)
+void minmax (ADCData8* a, uint16_t i, uint16_t j, uint8_t* min, uint8_t* max)
 	{
   uint8_t lmin, lmax, rmin, rmax, mid;
   if (i == j) {
@@ -74,7 +69,7 @@ void minmax (Data8* a, uint16_t i, uint16_t j, uint8_t* min, uint8_t* max)
   }
 }
 
-uint8_t Auto_Trigger(Data8* Signal, uint16_t Size)
+uint8_t Auto_Trigger(ADCData8* Signal, uint16_t Size)
 {
 	// NOT USED
 	uint8_t min,max;
@@ -90,7 +85,7 @@ uint8_t Auto_Trigger(Data8* Signal, uint16_t Size)
 		return trigger;
 }
 
-uint16_t Trigger(uint8_t Trigger_Point, volatile Data8* Signal, uint16_t Size, uint16_t Offset, uint16_t Screen_Size )
+uint16_t Trigger(uint8_t Trigger_Point, volatile ADCData8* Signal, uint16_t Size, uint16_t Offset, uint16_t Screen_Size )
 {
 	uint16_t i = 0;
 	uint16_t ctr = 0;

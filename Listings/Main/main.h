@@ -35,28 +35,23 @@
   ******************************************************************************
   */
   
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
 
-/* Includes ------------------------------------------------------------------*/
 #include <cstring>
 #include "stm32f7xx_hal.h"
 #include "Data_Processing.h"
 #include "Board_Buttons.h"              // ::Board Support:Buttons
 
-/* Exported types ------------------------------------------------------------*/
 typedef enum LOGIC{
 	FALSE=0,
 	TRUE=1
 }LOGIC;
 
-/* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   						(sizeof(__BUFFER__) * sizeof(*(__BUFFER__)))
 #define UNUSED(x) 												((void)(x))
 #define BUFFERSIZE(x)											(COUNTOF(x) - 1)
 
-/* Exported constants --------------------------------------------------------*/
 #define SPI_DMA														0 // 1 -> Use DMA. 0 -> Use IT
 #define FAKE_WAVEFORM 										0	// 1 -> Use fake waveform. 0 -> Use real waveform from ADC
 #define RX_BUFFERCOUNT										2048
@@ -64,7 +59,7 @@ typedef enum LOGIC{
 #define GUI_BUFFER_ADDRESS 								0xC0200000
 #define GUI_NUMBYTES  										0x200000
 #define AQQ_MAIN_BUFFER_ADDRESS						SDRAM_ADDRESS+GUI_NUMBYTES
-#define AQQ_COPY_BUFFER_ADDRESS						AQQ_MAIN_BUFFER_ADDRESS+RX_BUFFERCOUNT*sizeof(Data8)
+#define AQQ_COPY_BUFFER_ADDRESS						AQQ_MAIN_BUFFER_ADDRESS+RX_BUFFERCOUNT*sizeof(ADCData8)
 
 /* Definitions for SPIx RCC resources */
 #define SPIx															SPI2
@@ -110,14 +105,10 @@ typedef enum LOGIC{
 #define MEMCP_DMAx_CHANNEL								DMA_CHANNEL_1
 #define MEMCP_DMAx_IRQn										DMA1_Stream1_IRQn
 
-/* Exported functions ------------------------------------------------------- */
 void SPI_NSS_Init(void);
 void SPI_NSS_DeInit(void);
 
-/* Exported variables ------------------------------------------------------- */
-extern Data8 g_d8_RxBufferMain1[RX_BUFFERCOUNT];
-//extern Data8 g_d8_RxBufferMain2[RX_BUFFERCOUNT];
-//extern Data8* g_d8_pBuffer;
+extern ADCData8 g_d8_RxBufferMain1[RX_BUFFERCOUNT];
 
 #endif /* __MAIN_H */
 

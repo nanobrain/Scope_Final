@@ -14,7 +14,6 @@
 /********* PB_4 *********/
 /************************/
 
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "VGA_Config.h"
 #include "Error_Handler.h"
@@ -22,15 +21,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 static VGATXBUFFER _CurrentState;
 VGA_GAIN _CurrentGain;
 extern SPI_HandleTypeDef g_hSpi;
-
-/* Private function prototypes -----------------------------------------------*/
 
 HAL_StatusTypeDef VGA_Init(void)
 {
@@ -72,7 +65,7 @@ HAL_StatusTypeDef VGA_DeInit(void)
 
 int VGA_Step_Gain(STEP_DIRECTION a_Direction)
 {
-	VGA_GAIN curGain=0;
+	VGA_GAIN curGain;
 	curGain = VGA_Get_Gain();
 	switch(a_Direction)
 	{

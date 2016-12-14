@@ -14,7 +14,6 @@
 /********** PI2 *********/
 /************************/
 
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "DAC_Config.h"
 #include "Error_Handler.h"
@@ -22,16 +21,9 @@
 #include <cstring>
 #include <cstdlib>
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 static DACTXBUFFER _CurrentState;
 int16_t _CurrentOutVoltage;
 extern SPI_HandleTypeDef g_hSpi;
-
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
 
 HAL_StatusTypeDef DAC_Init(void)
 {

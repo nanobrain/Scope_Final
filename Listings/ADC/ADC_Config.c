@@ -14,36 +14,28 @@
 /********** PG_6    PB_8 **********/
 /**********************************/
 
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "ADC_Config.h"
 #include "Data_Processing.h"
 #include <stdlib.h>
 #include <cstdio>
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 extern SPI_HandleTypeDef g_hSpi;
 
 // Pointer to buffer which is currently used for acquisition
-//Data8* g_d8_pBuffer;
+//ADCData8* g_d8_pBuffer;
 // Main acquisition buffers
-Data8 g_d8_RxBufferMain1			[RX_BUFFERCOUNT]
+ADCData8 g_d8_RxBufferMain1			[RX_BUFFERCOUNT]
 														__attribute__((at(AQQ_MAIN_BUFFER_ADDRESS)))
 														/*__attribute__((aligned(16)))*/;
 
-/*Data8 g_d8_RxBufferMain2		[RX_BUFFERCOUNT]
+/*ADCData8 g_d8_RxBufferMain2		[RX_BUFFERCOUNT]
 														__attribute__((at(AQQ_COPY_BUFFER_ADDRESS)))*/
 														/*__attribute__((aligned(16)))*/;
 
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
-
 HAL_StatusTypeDef ADC_Init(void)
 {
-	//g_d8_RxBufferMain = (Data8*)malloc(BUFFERSIZE(g_d8_RxBufferMain));
+	//g_d8_RxBufferMain = (ADCData8*)malloc(BUFFERSIZE(g_d8_RxBufferMain));
 	// TODO: Check returned address!!
 	return HAL_OK;
 }
@@ -55,9 +47,9 @@ HAL_StatusTypeDef ADC_DeInit(void)
 
 HAL_StatusTypeDef ADC_Receive(void)
 {
-	uint16_t	i;
-	uint8_t		k;
-	static uint16_t offset=0, ctr=0;
+	#if FAKE_WAVEFORM == 1
+		static uint16_t offset=0, ctr=0;
+	#endif
 
 	HAL_StatusTypeDef errCode=HAL_OK;
 	
